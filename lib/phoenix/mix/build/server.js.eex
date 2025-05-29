@@ -1,4 +1,4 @@
-import { serve, readableStreamToJSON, readableStreamToText } from 'bun';
+import { serve, readableStreamToJSON, readableStreamToText, escapeHTML } from 'bun';
 import { renderToReadableStream, renderToString, renderToStaticMarkup } from 'react-dom/server';
 
 const __comMap = {};
@@ -96,8 +96,8 @@ const server = serve({
     const html = `
     <div role="alert" class="alert alert-error">
       <div>
-        <div class="font-bold">${error}</div>
-        <pre style="white-space: pre-wrap;">${error.stack}</pre>
+        <div class="font-bold">${escapeHTML(error)}</div>
+        <pre style="white-space: pre-wrap;">${escapeHTML(error.stack)}</pre>
       </div>
     </div>
     `;
