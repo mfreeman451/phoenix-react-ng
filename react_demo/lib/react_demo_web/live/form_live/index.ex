@@ -25,12 +25,14 @@ defmodule ReactDemoWeb.FormLive.Index do
 
   @impl true
   def handle_event("form:input", data, socket) do
-    form_data = socket.assigns.form_data
+    form_data =
+      socket.assigns.form_data
       |> Map.merge(data)
 
     FormProcess.set_form_data(form_data)
 
-    socket = socket
+    socket =
+      socket
       |> assign(:form_data, form_data)
       |> push_event("form:update", form_data)
 

@@ -54,7 +54,6 @@ defmodule ReactDemoWeb.ReactComponents do
     })
   end
 
-
   def react_live_form(assigns) do
     {static, props} = Map.pop(assigns, :static, nil)
 

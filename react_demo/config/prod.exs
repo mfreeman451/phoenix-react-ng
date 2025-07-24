@@ -14,13 +14,11 @@ config :react_demo, ReactDemoWeb.Endpoint,
 config :react_demo, ReactDemoWeb.Endpoint,
   cache_static_manifest: "priv/static/cache_manifest.json"
 
-
 config :phoenix_react_server, Phoenix.React.Runtime.Bun,
   cmd: System.find_executable("bun"),
   server_js: Path.expand("../priv/react/server.js", __DIR__),
   port: 5124,
   env: :dev
-
 
 # Do not print debug messages in production
 config :logger, :console, format: "[$level] $message\n"

@@ -18,7 +18,6 @@ defmodule Phoenix.React.Runtime.Bun do
   ```
   """
   require Logger
-  use HTTPoison.Base
 
   use Phoenix.React.Runtime
 
@@ -93,7 +92,6 @@ defmodule Phoenix.React.Runtime.Bun do
       end
 
     env = [
-      {~c"no_proxy", ~c"10.*,127.*,192.168.*,172.16.0.0/12,localhost,127.0.0.1,::1"},
       {~c"PORT", ~c"#{bun_port}"},
       {~c"BUN_PORT", ~c"#{bun_port}"},
       {~c"BUN_ENV", ~c"#{bun_env}"},
@@ -224,14 +222,7 @@ defmodule Phoenix.React.Runtime.Bun do
   def render_to_readable_stream(component, props, _from, state) do
     server_port = config()[:port]
 
-    reply =
-      case Jason.encode(props) do
-        {:ok, encoded_props} ->
-          get_rendered_component(server_port, component, encoded_props, :readable_stream)
-
-        {:error, error} ->
-          {:error, error}
-      end
+    reply = get_rendered_component(server_port, component, props, :readable_stream)
 
     {:reply, reply, state}
   end
@@ -240,14 +231,7 @@ defmodule Phoenix.React.Runtime.Bun do
   def render_to_string(component, props, _from, state) do
     server_port = config()[:port]
 
-    reply =
-      case Jason.encode(props) do
-        {:ok, encoded_props} ->
-          get_rendered_component(server_port, component, encoded_props, :string)
-
-        {:error, error} ->
-          {:error, error}
-      end
+    reply = get_rendered_component(server_port, component, props, :string)
 
     {:reply, reply, state}
   end
@@ -256,77 +240,34 @@ defmodule Phoenix.React.Runtime.Bun do
   def render_to_static_markup(component, props, _from, state) do
     server_port = config()[:port]
 
-    reply =
-      case Jason.encode(props) do
-        {:ok, encoded_props} ->
-          get_rendered_component(server_port, component, encoded_props, :static_markup)
-
-        {:error, error} ->
-          {:error, error}
-      end
+    reply = get_rendered_component(server_port, component, props, :static_markup)
 
     {:reply, reply, state}
   end
 
-  defmacro process_result(result) do
-    quote do
-      case unquote(result) do
-        {:ok,
-         %HTTPoison.Response{
-           body: data,
-           status_code: status_code
-         }}
-        when status_code >= 200 and status_code < 400 ->
-          {:ok, data}
-
-        {:ok,
-         %HTTPoison.Response{
-           body: body,
-           status_code: status_code,
-           request: %HTTPoison.Request{url: request_url}
-         }}
-        when status_code >= 400 and status_code < 500 ->
-          {:error, body}
-
-        {:ok,
-         %HTTPoison.Response{
-           body: body,
-           status_code: status_code,
-           request: %HTTPoison.Request{url: request_url}
-         }}
-        when status_code >= 500 ->
-          {:error, body}
-
-        {:ok, _} ->
-          {:error, "Unknown"}
-
-        {:error, %HTTPoison.Error{reason: reason} = error} ->
-          Logger.error(inspect({"HTTPoison.Error", error}))
-          {:error, reason}
+  defp get_rendered_component(server_port, component, props, type)
+       when type in [:static_markup, :string, :readable_stream] do
+    type_str =
+      if type == :string do
+        "component"
+      else
+        "#{type}"
       end
+
+    url = ~c"http://localhost:#{server_port}/#{type_str}/#{component}"
+    headers = [{~c"Content-Type", ~c"application/json"}]
+    body = Jason.encode!(props)
+
+    case :httpc.request(:post, {~c"#{url}", headers, ~c"application/json", ~c"#{body}"}, [], []) do
+      {:ok, {{_version, status_code, _status_text}, _headers, body}}
+      when status_code in 200..299 ->
+        {:ok, to_string(body)}
+
+      {:ok, {{_version, status_code, _status_text}, _headers, _body}} ->
+        {:error, "HTTP #{status_code}"}
+
+      {:error, reason} ->
+        {:error, reason}
     end
-  end
-
-  @impl true
-  def process_request_options(options) do
-    options
-    |> Keyword.put(:timeout, 30_000)
-    |> Keyword.put(:recv_timeout, 120_000)
-    |> Keyword.put(:hackney, proxy: nil)
-  end
-
-  defp get_rendered_component(server_port, component, props, :static_markup) do
-    url = "http://localhost:#{server_port}/static_markup/#{component}"
-    post(url, props) |> process_result()
-  end
-
-  defp get_rendered_component(server_port, component, props, :string) do
-    url = "http://localhost:#{server_port}/component/#{component}"
-    post(url, props) |> process_result()
-  end
-
-  defp get_rendered_component(server_port, component, props, :readable_stream) do
-    url = "http://localhost:#{server_port}/readable_stream/#{component}"
-    post(url, props) |> process_result()
   end
 end

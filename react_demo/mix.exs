@@ -8,6 +8,7 @@ defmodule ReactDemo.MixProject do
       elixir: "~> 1.14",
       build_path: "../_build",
       deps_path: "../deps",
+      lockfile: "../mix.lock",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),

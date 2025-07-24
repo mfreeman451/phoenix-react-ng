@@ -1,4 +1,3 @@
-
 defmodule SystemStats do
   use GenServer
 
@@ -30,13 +29,19 @@ defmodule SystemStats do
     #   "#{h}:#{m}:#{s}"
     # end.()
     schedule_work()
-    ReactDemoWeb.Endpoint.broadcast("system_usage:lobby", "stats", %{date: time, cpu: cpu, mem: mem})
+
+    ReactDemoWeb.Endpoint.broadcast("system_usage:lobby", "stats", %{
+      date: time,
+      cpu: cpu,
+      mem: mem
+    })
 
     {:noreply, [{time, cpu, mem} | state] |> Enum.take(100)}
   end
 
   defp schedule_work do
-    Process.send_after(self(), :check_stats, 5000)  # Every 5 seconds
+    # Every 5 seconds
+    Process.send_after(self(), :check_stats, 5000)
   end
 
   def cpu_usage do
@@ -44,8 +49,8 @@ defmodule SystemStats do
   end
 
   def memory_usage() do
-    total = :memsup.get_system_memory_data[:total_memory]
-    available = :memsup.get_system_memory_data[:available_memory]
+    total = :memsup.get_system_memory_data()[:total_memory]
+    available = :memsup.get_system_memory_data()[:available_memory]
     used = total - available
     used / 1024 / 1024
   end

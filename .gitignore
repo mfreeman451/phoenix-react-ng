@@ -9,4 +9,5 @@ erl_crash.dump
 node_modules
 package-lock.json
 /priv/tmp
+/priv/static/assets/
 bun.lockb

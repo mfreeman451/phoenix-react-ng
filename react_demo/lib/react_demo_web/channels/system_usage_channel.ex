@@ -15,14 +15,18 @@ defmodule ReactDemoWeb.SystemUsageChannel do
   def handle_info(:after_join, socket) do
     stats = SystemStats.get_stats()
 
-    data = stats |> Enum.map(fn({time, cpu, mem}) ->
-      %{ date: time, cpu: cpu, mem: mem }
-    end)
+    data =
+      stats
+      |> Enum.map(fn {time, cpu, mem} ->
+        %{date: time, cpu: cpu, mem: mem}
+      end)
+
     push(socket, "joined", %{
       message: "Welcome to the system usage lobby!",
       time: DateTime.utc_now(),
       data: data
     })
+
     {:noreply, socket}
   end
 

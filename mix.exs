@@ -32,7 +32,7 @@ defmodule Phoenix.React.Mixfile do
 
   def application do
     [
-      extra_applications: [:eex, :logger],
+      extra_applications: [:eex, :logger, :inets],
       env: [csrf_token_reader: {Plug.CSRFProtection, :get_csrf_token_for, []}]
     ]
   end
@@ -44,7 +44,6 @@ defmodule Phoenix.React.Mixfile do
   defp deps do
     [
       {:jason, "~> 1.2"},
-      {:httpoison, "~> 2.0"},
       {:phoenix_html, "~> 4.1"},
       {:phoenix_live_view, "~> 1.0"},
       {:file_system, "~> 1.0"},

@@ -11,9 +11,11 @@ defmodule ReactDemoWeb.PageController do
   def stats(conn, _params) do
     stats = SystemStats.get_stats()
 
-    data = stats |> Enum.map(fn({time, cpu, mem}) ->
-      %{ date: time, cpu: cpu, mem: mem }
-    end)
+    data =
+      stats
+      |> Enum.map(fn {time, cpu, mem} ->
+        %{date: time, cpu: cpu, mem: mem}
+      end)
 
     render(conn, :stats, data: data)
   end

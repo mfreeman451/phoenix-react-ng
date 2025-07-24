@@ -18,5 +18,4 @@ defmodule ReactDemoWeb.Router do
 
     live "/form", FormLive.Index, :index
   end
-
 end

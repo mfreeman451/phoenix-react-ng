@@ -3,3 +3,5 @@ erl_crash.dump
 node_modules
 package-lock.json
 /priv/react/components
+/priv/react/
+/priv/static/assets/
