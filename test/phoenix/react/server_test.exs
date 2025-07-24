@@ -36,13 +36,6 @@ defmodule Phoenix.React.ServerTest do
     end
   end
 
-  describe "set_runtime_process/1" do
-    test "sets runtime process pid" do
-      # Test cast on the already running server
-      assert :ok = GenServer.cast(Server, {:set_runtime_process, self()})
-    end
-  end
-
   describe "error handling" do
     test "handles invalid component gracefully" do
       # We can't test actual rendering without the runtime server

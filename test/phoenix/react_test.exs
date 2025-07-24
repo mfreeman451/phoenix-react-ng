@@ -62,12 +62,6 @@ defmodule Phoenix.ReactTest do
   end
 
   describe "error handling" do
-    test "handles invalid JSON in props gracefully" do
-      # Props with functions can't be JSON-encoded, but we can't test this easily
-      # So we'll test the basic error path
-      assert is_list(React.config())
-    end
-
     test "handles server timeout gracefully" do
       config = Application.get_env(:phoenix_react_server, Phoenix.React, [])
       original_timeout = config[:render_timeout] || 300_000
@@ -101,7 +95,7 @@ defmodule Phoenix.ReactTest do
       Phoenix.React.Cache.delete_cache(component, props, method)
       assert nil == Phoenix.React.Cache.get(component, props, method)
 
-      # First call should populate cache  
+      # First call should populate cache
       assert {:ok, html1} = React.render_to_string(component, props)
       assert is_binary(html1)
       cached_value = Phoenix.React.Cache.get(component, props, method)

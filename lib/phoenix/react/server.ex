@@ -60,20 +60,20 @@ defmodule Phoenix.React.Server do
     render_timeout = cfg[:render_timeout]
     args = [component_base: component_base, render_timeout: render_timeout]
 
-    {:ok, runtime_process} = Runtime.start_runtime(runtime, args)
+    {:ok, _} = Runtime.start_runtime(runtime, args)
 
     {:ok,
      %{
        runtime: runtime,
        component_base: component_base,
        render_timeout: render_timeout,
-       runtiem_process: runtime_process
+       runtiem_process: nil
      }}
   end
 
   @impl true
   def handle_cast({:set_runtime_process, pid}, state) do
-    {:noreply, Map.put(state, :runtiem_process, pid)}
+    {:noreply, %{state | runtiem_process: pid}}
   end
 
   @impl true
