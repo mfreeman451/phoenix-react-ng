@@ -49,6 +49,8 @@ jobs:
       run: |
         mix deps.get
         bun install
+        sudo apt-get update
+        sudo apt-get -y install inotify-tools
 
     - name: Check source code format
       run: mix format --check-formatted
