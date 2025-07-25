@@ -60,27 +60,34 @@ defmodule Phoenix.React.Server do
     render_timeout = cfg[:render_timeout]
     args = [component_base: component_base, render_timeout: render_timeout]
 
-    {:ok, runtiem_process} = Runtime.start_runtime(runtime, args)
+    {:ok, runtime_process} = Runtime.start_runtime(runtime, args)
+    Logger.debug(inspect({:runtime_process, "started", runtime_process}))
 
     {:ok,
      %{
        runtime: runtime,
        component_base: component_base,
        render_timeout: render_timeout,
-       runtiem_process: runtiem_process
+       runtime_process: runtime_process
      }}
   end
 
   @impl true
   def handle_cast({:set_runtime_process, pid}, state) do
-    {:noreply, %{state | runtiem_process: pid}}
+    Logger.debug(inspect({:runtime_process, "updated", pid}))
+    {:noreply, %{state | runtime_process: pid}}
+  end
+
+  @impl true
+  def handle_call(:get_state, _from, state) do
+    {:reply, state, state}
   end
 
   @impl true
   def handle_call(
         {:render_to_readable_stream, component, props},
         _from,
-        %{runtiem_process: runtiem_process} = state
+        %{runtime_process: runtime_process} = state
       ) do
     reply =
       case Cache.get(component, props, :render_to_readable_stream) do
@@ -88,7 +95,7 @@ defmodule Phoenix.React.Server do
           render_timeout = config()[:render_timeout]
 
           case GenServer.call(
-                 runtiem_process,
+                 runtime_process,
                  {:render_to_readable_stream, component, props},
                  render_timeout
                ) do
@@ -110,7 +117,7 @@ defmodule Phoenix.React.Server do
   def handle_call(
         {:render_to_string, component, props},
         _from,
-        %{runtiem_process: runtiem_process} = state
+        %{runtime_process: runtime_process} = state
       ) do
     reply =
       case Cache.get(component, props, :render_to_string) do
@@ -118,7 +125,7 @@ defmodule Phoenix.React.Server do
           render_timeout = config()[:render_timeout]
 
           case GenServer.call(
-                 runtiem_process,
+                 runtime_process,
                  {:render_to_string, component, props},
                  render_timeout
                ) do
@@ -140,35 +147,39 @@ defmodule Phoenix.React.Server do
   def handle_call(
         {:render_to_static_markup, component, props},
         _from,
-        %{runtiem_process: runtiem_process} = state
+        %{runtime_process: runtime_process} = state
       ) do
     reply =
-      case Cache.get(component, props, :render_to_static_markup) do
-        nil ->
-          render_timeout = config()[:render_timeout]
+      IO.inspect({:runtime, :render_to_static_markup, component, props})
 
-          case GenServer.call(
-                 runtiem_process,
-                 {:render_to_static_markup, component, props},
-                 render_timeout
-               ) do
-            {:ok, html} = reply ->
-              Cache.put(component, props, :render_to_static_markup, html)
-              reply
+    case Cache.get(component, props, :render_to_static_markup) do
+      nil ->
+        render_timeout = config()[:render_timeout]
+        IO.inspect({:runtime, :render_to_static_markup, nil, component, props, runtime_process})
 
-            reply ->
-              reply
-          end
+        case GenServer.call(
+               runtime_process,
+               {:render_to_static_markup, component, props},
+               render_timeout
+             ) do
+          {:ok, html} = reply ->
+            Cache.put(component, props, :render_to_static_markup, html)
+            reply
 
-        html ->
-          {:ok, html}
-      end
+          reply ->
+            reply
+        end
+
+      html ->
+        IO.inspect({:runtime, :render_to_static_markup, :saved, component, props})
+        {:ok, html}
+    end
 
     {:reply, reply, state}
   end
 
-  def handle_call(:stop_runtime, _from, %{runtiem_process: runtiem_process} = state) do
-    ok = GenServer.cast(runtiem_process, :shutdown)
+  def handle_call(:stop_runtime, _from, %{runtime_process: runtime_process} = state) do
+    ok = GenServer.cast(runtime_process, :shutdown)
     {:reply, ok, state}
   end
 end

@@ -5,3 +5,5 @@ config :phoenix_react_server, Phoenix.React,
   component_base: Path.expand("../test/fixtures", __DIR__),
   render_timeout: 5_000,
   cache_ttl: 60
+
+config :phoenix_react_server, Phoenix.React.Runtime.Bun, port: 12457

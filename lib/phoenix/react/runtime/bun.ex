@@ -204,47 +204,6 @@ defmodule Phoenix.React.Runtime.Bun do
     end
   end
 
-  @impl true
-  def handle_cast(:shutdown, %Runtime{port: port} = state) do
-    case port |> Port.info(:os_pid) do
-      {:os_pid, pid} ->
-        {_, code} = System.cmd("kill", ["-9", "#{pid}"])
-        code
-
-      _ ->
-        0
-    end
-
-    {:noreply, state}
-  end
-
-  @impl true
-  def render_to_readable_stream(component, props, _from, state) do
-    server_port = config()[:port]
-
-    reply = get_rendered_component(server_port, component, props, :readable_stream)
-
-    {:reply, reply, state}
-  end
-
-  @impl true
-  def render_to_string(component, props, _from, state) do
-    server_port = config()[:port]
-
-    reply = get_rendered_component(server_port, component, props, :string)
-
-    {:reply, reply, state}
-  end
-
-  @impl true
-  def render_to_static_markup(component, props, _from, state) do
-    server_port = config()[:port]
-
-    reply = get_rendered_component(server_port, component, props, :static_markup)
-
-    {:reply, reply, state}
-  end
-
   defp get_rendered_component(server_port, component, props, type)
        when type in [:static_markup, :string, :readable_stream] do
     type_str =
@@ -257,6 +216,8 @@ defmodule Phoenix.React.Runtime.Bun do
     url = ~c"http://localhost:#{server_port}/#{type_str}/#{component}"
     headers = [{~c"Content-Type", ~c"application/json"}]
     body = Jason.encode!(props)
+
+    Logger.debug({"get_rendered_component", url, headers, body})
 
     case :httpc.request(:post, {~c"#{url}", headers, ~c"application/json", ~c"#{body}"}, [], []) do
       {:ok, {{_version, status_code, _status_text}, _headers, body}}
