@@ -89,7 +89,20 @@ const server = serve({
         },
       });
     } catch(error) {
-      throw error;
+      const html = `
+      <div role="alert" class="alert alert-error">
+        <div>
+          <div class="font-bold">${escapeHTML(error)}</div>
+          <pre style="white-space: pre-wrap;">${escapeHTML(error.stack)}</pre>
+        </div>
+      </div>
+      `;
+      return new Response(html, {
+        status: 500,
+        headers: {
+          "Content-Type": "text/html",
+        },
+      });
     }
   },
   error(error) {

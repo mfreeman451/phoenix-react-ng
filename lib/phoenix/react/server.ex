@@ -60,14 +60,14 @@ defmodule Phoenix.React.Server do
     render_timeout = cfg[:render_timeout]
     args = [component_base: component_base, render_timeout: render_timeout]
 
-    {:ok, _} = Runtime.start_runtime(runtime, args)
+    {:ok, runtiem_process} = Runtime.start_runtime(runtime, args)
 
     {:ok,
      %{
        runtime: runtime,
        component_base: component_base,
        render_timeout: render_timeout,
-       runtiem_process: nil
+       runtiem_process: runtiem_process
      }}
   end
 
