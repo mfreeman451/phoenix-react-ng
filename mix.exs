@@ -2,7 +2,7 @@ defmodule Phoenix.React.Mixfile do
   use Mix.Project
 
   @source_url "https://github.com/gsmlg-dev/phoenix-react.git"
-  @version "0.7.1"
+  @version "0.7.2"
 
   def project do
     [
@@ -55,7 +55,7 @@ defmodule Phoenix.React.Mixfile do
     [
       maintainers: ["Jonathan Gao"],
       licenses: ["MIT"],
-      files: ~w(lib priv CHANGELOG.md LICENSE mix.exs README.md),
+      files: ~w(lib CHANGELOG.md LICENSE mix.exs README.md),
       links: %{
         Changelog: "https://hexdocs.pm/phoenix_react_server/changelog.html",
         GitHub: @source_url

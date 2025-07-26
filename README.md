@@ -23,7 +23,7 @@ See the [docs](https://hexdocs.pm/phoenix_react_server/) for more information.
 Add deps in `mix.exs`
 
 ```elixir
-{:phoenix_react_server, "~> 0.6"},
+{:phoenix_react_server, "~> 0.7"},
 ```
 
 ## Configuration
@@ -38,6 +38,8 @@ config :phoenix_react_server, Phoenix.React,
   runtime: Phoenix.React.Runtime.Bun,
   # react component base path
   component_base: Path.expand("../assets/component", __DIR__),
+  # render timeout, default to 5 seconds
+  render_timeout: 5_000,
   # cache ttl, default to 60 seconds
   cache_ttl: 60
 ```
