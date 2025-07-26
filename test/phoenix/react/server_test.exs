@@ -32,7 +32,7 @@ defmodule Phoenix.React.ServerTest do
     test "initializes with runtime process" do
       # Server is already started, check existing state
       state = :sys.get_state(Server)
-      assert Map.has_key?(state, :runtiem_process)
+      assert Map.has_key?(state, :runtime_process)
     end
   end
 

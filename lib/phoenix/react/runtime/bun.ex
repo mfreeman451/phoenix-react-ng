@@ -53,7 +53,7 @@ defmodule Phoenix.React.Runtime.Bun do
 
     Phoenix.React.Server.set_runtime_process(self())
 
-    {:noreply, %Runtime{state | port: port}}
+    {:noreply, %Runtime{state | runtime_port: port}}
   end
 
   @impl true
@@ -175,13 +175,35 @@ defmodule Phoenix.React.Runtime.Bun do
   end
 
   @impl true
+  def get_rendered_component(method, component, props, _state)
+      when method in [:render_to_readable_stream, :render_to_string, :render_to_static_markup] do
+    server_port = config()[:port]
+
+    url = ~c"http://localhost:#{server_port}/#{method}/#{component}"
+    headers = [{~c"Content-Type", ~c"application/json"}]
+    body = Jason.encode!(props)
+
+    case :httpc.request(:post, {~c"#{url}", headers, ~c"application/json", ~c"#{body}"}, [], []) do
+      {:ok, {{_version, status_code, _status_text}, _headers, body}}
+      when status_code in 200..299 ->
+        {:ok, to_string(body)}
+
+      {:ok, {{_version, status_code, _status_text}, _headers, body}} ->
+        {:error, "HTTP #{status_code}\n\n#{body}"}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  @impl true
   def terminate(reason, state) do
     Logger.debug("Bun.Server terminating")
     cleanup(reason, state)
   end
 
-  defp cleanup(reason, %Runtime{port: port} = _state) do
-    case port |> Port.info(:os_pid) do
+  defp cleanup(reason, %Runtime{runtime_port: runtime_port} = _state) do
+    case runtime_port |> Port.info(:os_pid) do
       {:os_pid, pid} ->
         {_, code} = System.cmd("kill", ["-9", "#{pid}"])
         code
@@ -197,38 +219,10 @@ defmodule Phoenix.React.Runtime.Bun do
     end
   end
 
-  defp get_port_os_pid(port) do
-    case port |> Port.info(:os_pid) do
+  defp get_port_os_pid(runtime_port) do
+    case runtime_port |> Port.info(:os_pid) do
       {:os_pid, pid} -> pid
       _ -> nil
-    end
-  end
-
-  defp get_rendered_component(server_port, component, props, type)
-       when type in [:static_markup, :string, :readable_stream] do
-    type_str =
-      if type == :string do
-        "component"
-      else
-        "#{type}"
-      end
-
-    url = ~c"http://localhost:#{server_port}/#{type_str}/#{component}"
-    headers = [{~c"Content-Type", ~c"application/json"}]
-    body = Jason.encode!(props)
-
-    Logger.debug({"get_rendered_component", url, headers, body})
-
-    case :httpc.request(:post, {~c"#{url}", headers, ~c"application/json", ~c"#{body}"}, [], []) do
-      {:ok, {{_version, status_code, _status_text}, _headers, body}}
-      when status_code in 200..299 ->
-        {:ok, to_string(body)}
-
-      {:ok, {{_version, status_code, _status_text}, _headers, _body}} ->
-        {:error, "HTTP #{status_code}"}
-
-      {:error, reason} ->
-        {:error, reason}
     end
   end
 end

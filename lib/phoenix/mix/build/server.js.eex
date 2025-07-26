@@ -35,9 +35,9 @@ const server = serve({
         });
       }
 
-      if (pathname.startsWith('/static_markup/')) {
+      if (pathname.startsWith('/render_to_static_markup/')) {
         const props = await readableStreamToJSON(bodyStream);
-        const fileName = pathname.replace(/^\/static_markup\//, '');
+        const fileName = pathname.replace(/^\/render_to_static_markup\//, '');
         const Component = __comMap[fileName];
         if (!Component) {
           return new Response(`Not Found, component not found.`, {
@@ -56,9 +56,9 @@ const server = serve({
         });
       }
 
-      if (pathname.startsWith('/component/')) {
+      if (pathname.startsWith('/render_to_string/')) {
         const props = await readableStreamToJSON(bodyStream);
-        const fileName = pathname.replace(/^\/component\//, '');
+        const fileName = pathname.replace(/^\/render_to_string\//, '');
         const Component = __comMap[fileName];
         const jsxNode = <Component {...props} />;
         const html = renderToString(jsxNode);
@@ -69,9 +69,9 @@ const server = serve({
         });
       }
 
-      if (pathname.startsWith('/readable_stream/')) {
+      if (pathname.startsWith('/render_to_readable_stream/')) {
         const props = await readableStreamToJSON(bodyStream);
-        const fileName = pathname.replace(/^\/readable_stream\//, '');
+        const fileName = pathname.replace(/^\/render_to_readable_stream\//, '');
         const Component = __comMap[fileName];
         const jsxNode = <Component {...props} />;
         const stream = await renderToReadableStream(jsxNode);

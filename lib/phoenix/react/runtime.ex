@@ -31,17 +31,19 @@ defmodule Phoenix.React.Runtime do
     DynamicSupervisor.start_child(__MODULE__, spec)
   end
 
-  defstruct [:component_base, :port, :server_js, :cd, render_timeout: 300_000]
+  defstruct [:component_base, :runtime_port, :server_js, :cd, render_timeout: 300_000]
 
   @type t :: %__MODULE__{
           render_timeout: integer(),
           component_base: path(),
           server_js: path(),
           cd: path(),
-          port: port()
+          runtime_port: port()
         }
 
   @type path :: binary()
+
+  @type method :: :render_to_readable_stream | :render_to_string | :render_to_static_markup
 
   @type component :: binary()
 
@@ -53,13 +55,7 @@ defmodule Phoenix.React.Runtime do
 
   @callback config() :: list()
 
-  @callback handle_call({:render_to_readable_stream, component(), map()}, GenServer.from(), t()) ::
-              {:reply, {:ok, html()}, t()} | {:reply, {:error, term()}, t()}
-
-  @callback handle_call({:render_to_string, component(), map()}, GenServer.from(), t()) ::
-              {:reply, {:ok, html()}, t()} | {:reply, {:error, term()}, t()}
-
-  @callback handle_call({:render_to_static_markup, component(), map()}, GenServer.from(), t()) ::
+  @callback get_rendered_component(method(), component(), map(), t()) ::
               {:reply, {:ok, html()}, t()} | {:reply, {:error, term()}, t()}
 
   defmacro __using__(_) do
@@ -70,9 +66,10 @@ defmodule Phoenix.React.Runtime do
       use GenServer
 
       @impl true
-      def handle_call({method, component, props}, from, state)
+      def handle_call({method, component, props}, _from, state)
           when method in [:render_to_readable_stream, :render_to_string, :render_to_static_markup] do
-        apply(__MODULE__, method, [component, props, from, state])
+        reply = apply(__MODULE__, :get_rendered_component, [method, component, props, state])
+        {:reply, reply, state}
       end
     end
   end

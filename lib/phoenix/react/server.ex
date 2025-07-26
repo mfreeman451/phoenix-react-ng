@@ -61,7 +61,6 @@ defmodule Phoenix.React.Server do
     args = [component_base: component_base, render_timeout: render_timeout]
 
     {:ok, runtime_process} = Runtime.start_runtime(runtime, args)
-    Logger.debug(inspect({:runtime_process, "started", runtime_process}))
 
     {:ok,
      %{
@@ -74,7 +73,6 @@ defmodule Phoenix.React.Server do
 
   @impl true
   def handle_cast({:set_runtime_process, pid}, state) do
-    Logger.debug(inspect({:runtime_process, "updated", pid}))
     {:noreply, %{state | runtime_process: pid}}
   end
 
@@ -150,30 +148,26 @@ defmodule Phoenix.React.Server do
         %{runtime_process: runtime_process} = state
       ) do
     reply =
-      IO.inspect({:runtime, :render_to_static_markup, component, props})
+      case Cache.get(component, props, :render_to_static_markup) do
+        nil ->
+          render_timeout = config()[:render_timeout]
 
-    case Cache.get(component, props, :render_to_static_markup) do
-      nil ->
-        render_timeout = config()[:render_timeout]
-        IO.inspect({:runtime, :render_to_static_markup, nil, component, props, runtime_process})
+          case GenServer.call(
+                 runtime_process,
+                 {:render_to_static_markup, component, props},
+                 render_timeout
+               ) do
+            {:ok, html} = reply ->
+              Cache.put(component, props, :render_to_static_markup, html)
+              reply
 
-        case GenServer.call(
-               runtime_process,
-               {:render_to_static_markup, component, props},
-               render_timeout
-             ) do
-          {:ok, html} = reply ->
-            Cache.put(component, props, :render_to_static_markup, html)
-            reply
+            reply ->
+              reply
+          end
 
-          reply ->
-            reply
-        end
-
-      html ->
-        IO.inspect({:runtime, :render_to_static_markup, :saved, component, props})
-        {:ok, html}
-    end
+        html ->
+          {:ok, html}
+      end
 
     {:reply, reply, state}
   end
