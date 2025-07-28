@@ -1,7 +1,7 @@
 defmodule Phoenix.React.HelperTest do
   use ExUnit.Case, async: true
 
-  alias Phoenix.React.Helper
+  # alias Phoenix.React.Helper
 
   setup_all do
     on_exit(fn -> nil end)

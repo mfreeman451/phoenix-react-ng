@@ -175,7 +175,7 @@ defmodule Phoenix.React.Runtime.Bun do
   end
 
   @impl true
-  def get_rendered_component(method, component, props, _state)
+  def get_rendered_component(method, component, props, state)
       when method in [:render_to_readable_stream, :render_to_string, :render_to_static_markup] do
     server_port = config()[:port]
 
@@ -183,7 +183,14 @@ defmodule Phoenix.React.Runtime.Bun do
     headers = [{~c"Content-Type", ~c"application/json"}]
     body = Jason.encode!(props)
 
-    case :httpc.request(:post, {~c"#{url}", headers, ~c"application/json", ~c"#{body}"}, [], []) do
+    timeout = state.render_timeout
+
+    case :httpc.request(
+           :post,
+           {~c"#{url}", headers, ~c"application/json", body},
+           [timeout: timeout, connect_timeout: timeout],
+           body_format: :binary
+         ) do
       {:ok, {{_version, status_code, _status_text}, _headers, body}}
       when status_code in 200..299 ->
         {:ok, to_string(body)}

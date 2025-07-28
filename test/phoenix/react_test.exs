@@ -49,6 +49,12 @@ defmodule Phoenix.ReactTest do
       assert is_binary(html)
     end
 
+    test "render_to_static_markup functions with data props" do
+      doc = File.read!(Path.expand("../data/doc1.md", __DIR__))
+      assert {:ok, html} = React.render_to_static_markup("markdown", %{data: doc})
+      assert is_binary(html)
+    end
+
     test "render functions with complex props" do
       props = %{
         title: "Test Title",

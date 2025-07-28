@@ -12,3 +12,4 @@ package-lock.json
 /priv/static/assets/
 /priv/bun
 bun.lockb
+bun.lock
