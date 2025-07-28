@@ -37,6 +37,7 @@ jobs:
       run: |
         mix deps.get
         bun install
+        cd test && bun install
 
     - name: Check source code format
       run: mix format --check-formatted

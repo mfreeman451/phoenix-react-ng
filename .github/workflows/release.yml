@@ -49,6 +49,7 @@ jobs:
       run: |
         mix deps.get
         bun install
+        cd test && bun install
         sudo apt-get update
         sudo apt-get -y install inotify-tools
 
