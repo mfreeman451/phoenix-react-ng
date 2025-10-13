@@ -13,3 +13,5 @@ package-lock.json
 /priv/bun
 bun.lockb
 bun.lock
+.devenv/
+.devenv.flake.nix
