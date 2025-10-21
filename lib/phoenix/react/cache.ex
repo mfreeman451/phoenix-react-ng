@@ -18,7 +18,7 @@ defmodule Phoenix.React.Cache do
   end
 
   @impl true
-  @spec init(any()) :: {:ok, %{}}
+  @spec init(term()) :: {:ok, map()}
   def init(_) do
     state = %{}
     ensure_started()
@@ -50,52 +50,108 @@ defmodule Phoenix.React.Cache do
     Process.send_after(self(), :gc, gc_time)
   end
 
+  @typedoc "Cache key type for component rendering"
+  @type cache_key :: {String.t(), map(), atom()}
+
+  @typedoc "Cache record stored in ETS"
+  @type cache_record :: {cache_key(), String.t(), integer()}
+
+  @typedoc "Cache method type"
+  @type cache_method :: :render_to_static_markup | :render_to_string | :render_to_readable_stream
+
+  @typedoc "TTL in seconds"
+  @type ttl :: non_neg_integer()
+
   @doc """
-  Get a cached value
+  Retrieves a cached rendering result.
+
+  ## Parameters
+
+  - `component` - Component name
+  - `props` - Component props
+  - `method` - Rendering method
+
+  ## Returns
+
+  - `binary()` - Cached HTML if found and not expired
+  - `nil` - No cached result found or expired
+
+  ## Example
+
+      iex> Phoenix.React.Cache.get("chart", %{"data" => [1,2,3]}, :render_to_string)
+      "<div>...</div>"
   """
-  @spec get(Phoenix.React.component(), Phoenix.React.props(), :static_markup | :string) ::
-          binary() | nil
-  def get(component, props, mod) do
-    lookup(component, props, mod)
+  @spec get(String.t(), map(), cache_method()) :: String.t() | nil
+  def get(component, props, method) do
+    lookup(component, props, method)
   end
 
   @doc """
-  Set a cached value
+  Stores a rendering result in cache.
+
+  ## Parameters
+
+  - `component` - Component name
+  - `props` - Component props  
+  - `method` - Rendering method
+  - `result` - HTML result to cache
+  - `opts` - Options including `:ttl` (default: configured cache TTL)
+
+  ## Returns
+
+  - `true` - Successfully cached
+
+  ## Example
+
+      iex> Phoenix.React.Cache.put("chart", %{"data" => [1,2,3]}, :render_to_string, "<div>...</div>", ttl: 300)
+      true
   """
-  @spec put(Phoenix.React.component(), Phoenix.React.props(), :static_markup | :string, binary(),
-          ttl: integer()
-        ) :: true
-  def put(component, props, mod, result, opt \\ []) do
+  @spec put(String.t(), map(), cache_method(), String.t(), keyword()) :: true
+  def put(component, props, method, result, opt \\ []) do
     ttl = Keyword.get(opt, :ttl, @default_ttl)
     expiration = :os.system_time(:seconds) + ttl
-    record = {[component, props, mod], result, expiration}
+    record = {[component, props, method], result, expiration}
     :ets.insert(@ets_table_name, record)
   end
 
   @doc """
-  Remove cached value
+  Removes a cached rendering result.
+
+  ## Parameters
+
+  - `component` - Component name
+  - `props` - Component props
+  - `method` - Rendering method
+
+  ## Returns
+
+  - `true` - Entry removed (or didn't exist)
+
+  ## Example
+
+      iex> Phoenix.React.Cache.delete_cache("chart", %{"data" => [1,2,3]}, :render_to_string)
+      true
   """
-  @spec delete_cache(Phoenix.React.component(), Phoenix.React.props(), :static_markup | :string) ::
-          true
-  def delete_cache(component, props, mod) do
-    :ets.delete(@ets_table_name, [component, props, mod])
+  @spec delete_cache(String.t(), map(), cache_method()) :: true
+  def delete_cache(component, props, method) do
+    :ets.delete(@ets_table_name, [component, props, method])
   end
 
-  defp lookup(component, props, mod) do
-    case :ets.lookup(@ets_table_name, [component, props, mod]) do
+  @spec lookup(String.t(), map(), cache_method()) :: String.t() | nil
+  defp lookup(component, props, method) do
+    case :ets.lookup(@ets_table_name, [component, props, method]) do
       [result | _] -> check_freshness(result)
       [] -> nil
     end
   end
 
-  defp check_freshness({[component, props, mod], result, expiration}) do
-    cond do
-      expiration > :os.system_time(:seconds) ->
-        result
-
-      :else ->
-        delete_cache(component, props, mod)
-        nil
+  @spec check_freshness(cache_record()) :: String.t() | nil
+  defp check_freshness({[component, props, method], result, expiration}) do
+    if expiration > :os.system_time(:seconds) do
+      result
+    else
+      delete_cache(component, props, method)
+      nil
     end
   end
 

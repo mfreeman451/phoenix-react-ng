@@ -312,20 +312,83 @@ defmodule Phoenix.React do
   end
 
   @typedoc """
-  React component file name
-  Must export a `Component` function
+  React component file name without extension.
+
+  The component file must export a `Component` function that accepts props
+  and returns a React element.
+
+  ## Example
+
+      # For file "assets/component/chart.jsx"
+      component = "chart"
   """
-  @type component :: binary()
+  @type component :: String.t()
+
   @typedoc """
-  React component props
-  Must be a json serializable map
+  React component props.
+
+  Must be a JSON-serializable map that can be passed to the React component.
+  All keys and values must be serializable to JSON.
+
+  ## Example
+
+      props = %{
+        "data" => [1, 2, 3],
+        "title" => "My Chart",
+        "options" => %{ "color" => "blue" }
+      }
   """
   @type props :: map()
 
-  @doc """
-  Render a React component to a string by call `renderToReadableStream` in `react-dom/server`
+  @typedoc """
+  Rendering method for React components.
+
+  - `:render_to_static_markup` - Renders to static HTML (no React data attributes)
+  - `:render_to_string` - Renders to HTML with React data attributes for hydration
+  - `:render_to_readable_stream` - Renders to a readable stream for large components
   """
-  @spec render_to_readable_stream(component, props) :: {:ok, binary()} | {:error, term()}
+  @type render_method :: :render_to_static_markup | :render_to_string | :render_to_readable_stream
+
+  @typedoc """
+  Render result containing the HTML output.
+
+  The HTML string contains the rendered React component and can be
+  directly embedded in Phoenix templates.
+  """
+  @type render_result :: {:ok, String.t()} | {:error, term()}
+
+  @typedoc """
+  Configuration options for Phoenix.React.
+  """
+  @type config :: %{
+          optional(:runtime) => module(),
+          optional(:component_base) => Path.t(),
+          optional(:render_timeout) => timeout(),
+          optional(:cache_ttl) => non_neg_integer()
+        }
+
+  @doc """
+  Render a React component to a readable stream.
+
+  Uses `renderToReadableStream` from `react-dom/server` for optimal
+  performance with large components or streaming scenarios.
+
+  ## Parameters
+
+  - `component` - The component name (file without extension)
+  - `props` - JSON-serializable map of component props (default: `%{}`)
+
+  ## Returns
+
+  - `{:ok, html}` - Successfully rendered HTML string
+  - `{:error, reason}` - Rendering failed with error reason
+
+  ## Example
+
+      iex> Phoenix.React.render_to_readable_stream("chart", %{"data" => [1, 2, 3]})
+      {:ok, "<div>...</div>"}
+  """
+  @spec render_to_readable_stream(component(), props()) :: render_result()
   def render_to_readable_stream(component, props \\ %{}) do
     server = find_server_pid()
     timeout = Phoenix.React.Server.config()[:render_timeout]
@@ -336,9 +399,27 @@ defmodule Phoenix.React do
   end
 
   @doc """
-  Render a React component to a string by call `renderToString` in `react-dom/server`
+  Render a React component to an HTML string with hydration support.
+
+  Uses `renderToString` from `react-dom/server` to generate HTML that
+  includes React data attributes for client-side hydration.
+
+  ## Parameters
+
+  - `component` - The component name (file without extension)
+  - `props` - JSON-serializable map of component props (default: `%{}`)
+
+  ## Returns
+
+  - `{:ok, html}` - Successfully rendered HTML string
+  - `{:error, reason}` - Rendering failed with error reason
+
+  ## Example
+
+      iex> Phoenix.React.render_to_string("chart", %{"data" => [1, 2, 3]})
+      {:ok, "<div data-reactroot=\"\">...</div>"}
   """
-  @spec render_to_string(component, props) :: {:ok, binary()} | {:error, term()}
+  @spec render_to_string(component(), props()) :: render_result()
   def render_to_string(component, props \\ %{}) do
     server = find_server_pid()
     timeout = Phoenix.React.Server.config()[:render_timeout]
@@ -349,9 +430,28 @@ defmodule Phoenix.React do
   end
 
   @doc """
-  Render a React component to a string by call `renderToStaticMarkup` in `react-dom/server`
+  Render a React component to static HTML markup.
+
+  Uses `renderToStaticMarkup` from `react-dom/server` to generate
+  static HTML without React data attributes. Ideal for SEO content
+  that doesn't need client-side interactivity.
+
+  ## Parameters
+
+  - `component` - The component name (file without extension)
+  - `props` - JSON-serializable map of component props
+
+  ## Returns
+
+  - `{:ok, html}` - Successfully rendered HTML string
+  - `{:error, reason}` - Rendering failed with error reason
+
+  ## Example
+
+      iex> Phoenix.React.render_to_static_markup("markdown", %{"content" => "# Hello"})
+      {:ok, "<h1>Hello</h1>"}
   """
-  @spec render_to_static_markup(component, props) :: {:ok, binary()} | {:error, term()}
+  @spec render_to_static_markup(component(), props()) :: render_result()
   def render_to_static_markup(component, props) do
     server = find_server_pid()
     timeout = Phoenix.React.Server.config()[:render_timeout]
@@ -361,8 +461,18 @@ defmodule Phoenix.React do
       {:error, error}
   end
 
+  @doc """
+  Find the process ID of the React server.
+
+  ## Returns
+
+  - `pid()` - The server process ID
+  - `nil` - Server not found
+
+  Used internally by render functions to locate the server process.
+  """
+  @spec find_server_pid() :: pid() | nil
   def find_server_pid() do
-    # pid = Supervisor.whereis(__MODULE__)
     children = Supervisor.which_children(__MODULE__)
 
     Enum.find_value(children, fn {_, pid, _, [m | _]} ->
@@ -374,6 +484,18 @@ defmodule Phoenix.React do
     end)
   end
 
+  @doc """
+  Stop the React runtime process.
+
+  Useful for development when you need to restart the runtime
+  after configuration changes.
+
+  ## Returns
+
+  - `:ok` - Runtime stopped successfully
+  - `{:error, reason}` - Failed to stop runtime
+  """
+  @spec stop_runtime() :: :ok | {:error, term()}
   def stop_runtime() do
     server = find_server_pid()
     GenServer.call(server, :stop_runtime)

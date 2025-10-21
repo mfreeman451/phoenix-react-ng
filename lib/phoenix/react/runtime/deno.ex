@@ -1,22 +1,66 @@
 defmodule Phoenix.React.Runtime.Deno do
   @moduledoc """
-  Phoenix.React.Runtime.Deno
+  Deno runtime for Phoenix.React server.
 
-  Config in `runtime.exs`
+  This runtime uses Deno as the JavaScript runtime for rendering React components.
+  Deno provides secure defaults, TypeScript support, and excellent performance.
 
-  ```
+  ## Configuration
+
+  Configure in `runtime.exs`:
+
+  ```elixir
   import Config
 
   config :phoenix_react_server, Phoenix.React.Runtime.Deno,
     cd: File.cwd!(),
-    cmd: "/path/to/deno",
+    cmd: System.find_executable("deno"),
     # In dev mode, the server_js will be watched and recompiled when changed
-    # In prod mode, this need to be precompiled with `mix phx.react.deno.bundle`
+    # In prod mode, this needs to be precompiled with `mix phx.react.deno.bundle`
     server_js: Path.expand("deno/server.js", :code.priv_dir(:phoenix_react_server)),
     port: 5226,
     env: :dev,
     # Security: restrict write access to specific directories
     write_dirs: ["/tmp", "/var/tmp"]
+  ```
+
+  ## Configuration Options
+
+  - `:cd` - Working directory for the Deno process (default: current directory)
+  - `:cmd` - Path to Deno executable (default: system `deno` command)
+  - `:server_js` - Path to the bundled server JavaScript file
+  - `:port` - Port for the Deno HTTP server (default: 5226)
+  - `:env` - Environment mode (`:dev` or `:prod`, default: `:dev`)
+  - `:write_dirs` - List of directories Deno can write to (security feature)
+  - `:parent_check_interval` - Interval to check parent process health (default: 5000ms)
+
+  ## Security Features
+
+  Deno runtime provides enhanced security:
+  - Restricted file system access via `write_dirs`
+  - Automatic parent process monitoring
+  - Sandboxed execution environment
+
+  ## Component Requirements
+
+  Components for Deno runtime must:
+  - Use `.jsx` file extension for proper JSX parsing
+  - Export a `Component` function
+  - Be compatible with Deno's module system
+
+  ## Development Mode
+
+  In development mode (`env: :dev`), the runtime will:
+  - Start a file watcher for component changes
+  - Automatically rebuild the server bundle when components change
+  - Enable hot reloading for React components
+
+  ## Production Mode
+
+  In production mode (`env: :prod`), you must pre-bundle the components:
+
+  ```bash
+  mix phx.react.deno.bundle --component-base=assets/component --output=priv/react/server.js
   ```
   """
   require Logger
@@ -24,14 +68,29 @@ defmodule Phoenix.React.Runtime.Deno do
   use Phoenix.React.Runtime
   import Phoenix.React.Runtime.Common
 
+  @doc """
+  Starts the Deno runtime server.
+
+  ## Parameters
+
+  - `init_arg` - Initialization arguments (typically `[]`)
+
+  ## Returns
+
+  - `{:ok, pid}` - Runtime started successfully
+  - `{:error, reason}` - Failed to start runtime
+  """
+  @spec start_link(term()) :: GenServer.on_start()
   def start_link(init_arg) do
     GenServer.start_link(__MODULE__, init_arg, name: __MODULE__)
   end
 
   @impl true
+  @spec init(keyword()) ::
+          {:ok, Phoenix.React.Runtime.t(), {:continue, :start_port}} | {:stop, term()}
   def init(component_base: component_base, render_timeout: render_timeout) do
     {:ok,
-     %Runtime{
+     %Phoenix.React.Runtime{
        component_base: component_base,
        render_timeout: render_timeout,
        server_js: config()[:server_js],
@@ -42,7 +101,7 @@ defmodule Phoenix.React.Runtime.Deno do
   @impl true
   @spec handle_continue(:start_port, Phoenix.React.Runtime.t()) ::
           {:noreply, Phoenix.React.Runtime.t()}
-  def handle_continue(:start_port, %Runtime{component_base: component_base} = state) do
+  def handle_continue(:start_port, %Phoenix.React.Runtime{component_base: component_base} = state) do
     if config()[:env] == :dev do
       start_file_watcher(component_base)
       Phoenix.React.Runtime.FileWatcher.set_ref(self())

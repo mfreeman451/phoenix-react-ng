@@ -19,25 +19,64 @@ defmodule Phoenix.React.Server do
 
   use GenServer
 
-  @type second() :: integer()
-  @type millisecond() :: integer()
+  @typedoc "Time in seconds"
+  @type second() :: non_neg_integer()
 
+  @typedoc "Time in milliseconds"
+  @type millisecond() :: non_neg_integer()
+
+  @typedoc "Server state containing runtime and configuration"
+  @type server_state :: %{
+          runtime: module(),
+          component_base: Path.t(),
+          render_timeout: millisecond(),
+          runtime_process: pid()
+        }
+
+  @typedoc "Configuration options for the React server"
+  @type server_config :: [
+          {:cache_ttl, second()}
+          | {:component_base, Path.t()}
+          | {:render_timeout, millisecond()}
+          | {:runtime, module()}
+        ]
+
+  @doc """
+  Sets the runtime process PID.
+
+  Used internally to update the runtime process reference.
+
+  ## Parameters
+
+  - `pid` - The runtime process PID
+  """
+  @spec set_runtime_process(pid()) :: :ok
   def set_runtime_process(pid) do
     GenServer.cast(__MODULE__, {:set_runtime_process, pid})
   end
 
   @doc """
-  Return the configuration of the React Render Server from `Application.get_env(:phoenix_react_server, Phoenix.React)`
+  Returns the React Render Server configuration.
+
+  Retrieves configuration from `Application.get_env(:phoenix_react_server, Phoenix.React)`
+  and applies default values for missing options.
+
+  ## Returns
+
+  Keyword list containing:
+  - `:runtime` - Runtime module (default: `Phoenix.React.Runtime.Bun`)
+  - `:component_base` - Component directory path
+  - `:cache_ttl` - Cache TTL in seconds (default: 600)
+  - `:render_timeout` - Render timeout in milliseconds (default: 300_000)
+
+  ## Example
+
+      iex> Phoenix.React.Server.config()
+      [runtime: Phoenix.React.Runtime.Bun, component_base: "/path/to/components", ...]
   """
-  @spec config() :: [
-          {:cache_ttl, second()}
-          | {:component_base, binary()}
-          | {:render_timeout, millisecond()}
-          | {:runtime, module()},
-          ...
-        ]
+  @spec config() :: server_config()
   def config() do
-    config = Application.get_env(:phoenix_react_server, Phoenix.React)
+    config = Application.get_env(:phoenix_react_server, Phoenix.React, [])
 
     [
       runtime: config[:runtime] || Phoenix.React.Runtime.Bun,
@@ -47,11 +86,25 @@ defmodule Phoenix.React.Server do
     ]
   end
 
+  @doc """
+  Starts the React Render Server.
+
+  ## Parameters
+
+  - `init_arg` - Initial arguments (typically `[]`)
+
+  ## Returns
+
+  - `{:ok, pid}` - Server started successfully
+  - `{:error, reason}` - Failed to start server
+  """
+  @spec start_link(term()) :: GenServer.on_start()
   def start_link(init_arg) do
     GenServer.start_link(__MODULE__, init_arg, name: __MODULE__)
   end
 
   @impl true
+  @spec init(term()) :: {:ok, server_state()} | {:stop, term()}
   def init([]) do
     cfg = config()
 
@@ -60,15 +113,19 @@ defmodule Phoenix.React.Server do
     render_timeout = cfg[:render_timeout]
     args = [component_base: component_base, render_timeout: render_timeout]
 
-    {:ok, runtime_process} = Runtime.start_runtime(runtime, args)
+    case Runtime.start_runtime(runtime, args) do
+      {:ok, runtime_process} ->
+        {:ok,
+         %{
+           runtime: runtime,
+           component_base: component_base,
+           render_timeout: render_timeout,
+           runtime_process: runtime_process
+         }}
 
-    {:ok,
-     %{
-       runtime: runtime,
-       component_base: component_base,
-       render_timeout: render_timeout,
-       runtime_process: runtime_process
-     }}
+      {:error, reason} ->
+        {:stop, reason}
+    end
   end
 
   @impl true

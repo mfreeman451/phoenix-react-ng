@@ -33,30 +33,58 @@ defmodule Phoenix.React.Runtime do
 
   defstruct [:component_base, :runtime_port, :server_js, :cd, render_timeout: 300_000]
 
+  @typedoc "Runtime state structure"
   @type t :: %__MODULE__{
-          render_timeout: integer(),
-          component_base: path(),
-          server_js: path(),
-          cd: path(),
+          render_timeout: timeout(),
+          component_base: Path.t(),
+          server_js: Path.t(),
+          cd: Path.t(),
           runtime_port: port()
         }
 
-  @type path :: binary()
+  @typedoc "File system path"
+  @type path :: Path.t()
 
+  @typedoc "Rendering method"
   @type method :: :render_to_readable_stream | :render_to_string | :render_to_static_markup
 
-  @type component :: binary()
+  @typedoc "Component name"
+  @type component :: String.t()
 
-  @type html :: binary()
+  @typedoc "Rendered HTML output"
+  @type html :: String.t()
 
-  @callback start([{:component_base, path()}, {:render_timeout, integer()}]) :: port()
+  @typedoc "Runtime start arguments"
+  @type start_args :: [
+          {:component_base, path()}
+          | {:render_timeout, timeout()}
+        ]
 
-  @callback start_file_watcher(path()) :: :ok
+  @typedoc "Runtime configuration"
+  @type runtime_config :: keyword()
 
-  @callback config() :: list()
+  @typedoc "Render response"
+  @type render_response :: {:reply, {:ok, html()}, t()} | {:reply, {:error, term()}, t()}
 
-  @callback get_rendered_component(method(), component(), map(), t()) ::
-              {:reply, {:ok, html()}, t()} | {:reply, {:error, term()}, t()}
+  @doc """
+  Starts the runtime with given arguments.
+  """
+  @callback start(start_args()) :: {:ok, pid()} | {:error, term()}
+
+  @doc """
+  Starts a file watcher for the component directory.
+  """
+  @callback start_file_watcher(path()) :: {:ok, pid()} | {:error, term()}
+
+  @doc """
+  Returns runtime configuration.
+  """
+  @callback config() :: runtime_config()
+
+  @doc """
+  Renders a component using the specified method.
+  """
+  @callback get_rendered_component(method(), component(), map(), t()) :: render_response()
 
   defmacro __using__(_) do
     quote do

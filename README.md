@@ -6,50 +6,58 @@
 [![Hex.pm](https://img.shields.io/hexpm/dt/phoenix_react_server.svg)](https://hex.pm/packages/phoenix_react_server)
 [![Hex.pm](https://img.shields.io/hexpm/dw/phoenix_react_server.svg)](https://hex.pm/packages/phoenix_react_server)
 
-Run a `react` render server to render react component in `Phoenix` html.
+Phoenix.React is a powerful library that enables server-side rendering of React components within Phoenix applications. It provides seamless integration between React and Phoenix, supporting multiple rendering methods and runtime environments.
 
-**Features**
+## ✨ Features
 
-- [x] Render to static markup
-- [x] Render to string
-- [x] Render to readable stream
-- [x] Hydrate at client side
-- [x] Connect to Live View render
+- **🎨 Multiple Rendering Methods**: Support for `renderToStaticMarkup`, `renderToString`, and `renderToReadableStream`
+- **⚡ Dual Runtime Support**: Choose between Bun and Deno runtimes for optimal performance
+- **🔄 Client-Side Hydration**: Full support for React hydration with Phoenix LiveView
+- **💾 Intelligent Caching**: Built-in caching system with configurable TTL
+- **👀 File Watching**: Automatic component reloading in development
+- **🔒 Type Safety**: Comprehensive type specifications and documentation
+- **🚀 Production Ready**: Optimized for release deployments with bundled assets
 
-See the [docs](https://hexdocs.pm/phoenix_react_server/) for more information.
+## 📚 Documentation
 
-## Install this package
+See the [complete documentation](https://hexdocs.pm/phoenix_react_server/) for detailed API reference and examples.
 
-Add deps in `mix.exs`
+## 🚀 Installation
+
+Add `phoenix_react_server` to your dependencies in `mix.exs`:
 
 ```elixir
-{:phoenix_react_server, "~> 0.7"},
+def deps do
+  [
+    {:phoenix_react_server, "~> 0.7"}
+  ]
+end
 ```
 
-## Configuration
+## ⚙️ Configuration
 
-Set config, runtime, react components, etc.
+Configure Phoenix.React in your application config:
 
 ```elixir
 import Config
 
 config :phoenix_react_server, Phoenix.React,
-  # react runtime, default to `bun`
+  # React runtime (default: Phoenix.React.Runtime.Bun)
   runtime: Phoenix.React.Runtime.Bun,
-  # react component base path
+  # React component base path
   component_base: Path.expand("../assets/component", __DIR__),
-  # render timeout, default to 5 seconds
+  # Render timeout in milliseconds (default: 5_000)
   render_timeout: 5_000,
-  # cache ttl, default to 60 seconds
+  # Cache TTL in seconds (default: 60)
   cache_ttl: 60
 ```
 
-Supported `runtime`
+### Supported Runtimes
 
-- [x] `Phoenix.React.Runtime.Bun`
-- [x] `Phoenix.React.Runtime.Deno`
+- **Bun Runtime** (`Phoenix.React.Runtime.Bun`) - Fast JavaScript runtime with built-in bundler
+- **Deno Runtime** (`Phoenix.React.Runtime.Deno`) - Secure JavaScript runtime with TypeScript support
 
-### Using Deno Runtime
+### Deno Runtime Configuration
 
 To use Deno instead of Bun, configure the runtime and its specific settings:
 
@@ -67,13 +75,14 @@ config :phoenix_react_server, Phoenix.React.Runtime.Deno,
   env: :dev  # Use :prod for production
 ```
 
-**Deno Requirements:**
-- Deno 2.x (recommended)
+#### Deno Requirements
+- **Deno 2.x** (recommended)
 - Components must use `.jsx` file extension for proper JSX parsing
 - Deno automatically downloads npm packages via `--node-modules-dir` flag
 
-**Environment Variable Switching:**
-You can also use environment variable to switch runtimes:
+#### Environment Variable Switching
+
+You can use environment variables to switch runtimes dynamically:
 
 ```elixir
 runtime =
@@ -86,30 +95,33 @@ runtime =
 config :phoenix_react_server, Phoenix.React, runtime: runtime
 ```
 
-Add Render Server in your application Supervisor tree.
+### Application Setup
+
+Add the React render server to your application's Supervisor tree:
 
 ```elixir
-  def start(_type, _args) do
-    children = [
-      ReactDemoWeb.Telemetry,
-      {DNSCluster, query: Application.get_env(:react_demo, :dns_cluster_query) || :ignore},
-      {Phoenix.PubSub, name: ReactDemo.PubSub},
-      # React render service
-      Phoenix.React,
-      ReactDemoWeb.Endpoint
-    ]
+def start(_type, _args) do
+  children = [
+    ReactDemoWeb.Telemetry,
+    {DNSCluster, query: Application.get_env(:react_demo, :dns_cluster_query) || :ignore},
+    {Phoenix.PubSub, name: ReactDemo.PubSub},
+    # React render service
+    Phoenix.React,
+    ReactDemoWeb.Endpoint
+  ]
 
-    opts = [strategy: :one_for_one, name: ReactDemo.Supervisor]
-    Supervisor.start_link(children, opts)
-  end
+  opts = [strategy: :one_for_one, name: ReactDemo.Supervisor]
+  Supervisor.start_link(children, opts)
+end
 ```
 
-Write Phoenix Component use `react_component`
+### Creating React Components
+
+Create a Phoenix component module to wrap your React components:
 
 ```elixir
 defmodule ReactDemoWeb.ReactComponents do
   use Phoenix.Component
-
   import Phoenix.React.Helper
 
   def react_markdown(assigns) do
@@ -124,41 +136,43 @@ defmodule ReactDemoWeb.ReactComponents do
 end
 ```
 
-Import in html helpers in `react_demo_web.ex`
+Import your React components in the HTML helpers:
 
 ```elixir
-  defp html_helpers do
-    quote do
-      # Translation
-      use Gettext, backend: ReactDemoWeb.Gettext
+defp html_helpers do
+  quote do
+    # Translation
+    use Gettext, backend: ReactDemoWeb.Gettext
 
-      # HTML escaping functionality
-      import Phoenix.HTML
-      # Core UI components
-      import ReactDemoWeb.CoreComponents
-      import ReactDemoWeb.ReactComponents
+    # HTML escaping functionality
+    import Phoenix.HTML
+    # Core UI components
+    import ReactDemoWeb.CoreComponents
+    import ReactDemoWeb.ReactComponents
 
-      ...
-    end
+    # ... other imports
   end
+end
 ```
 
-### `render_to_static_markup`
+## 🎯 Rendering Methods
 
-Then you can use react server rendered component in Phoenix Component
+### Static Markup Rendering
+
+Use `render_to_static_markup` for SEO-friendly content that doesn't need client-side interaction:
 
 ```html
 <div class="card">
-  <div clas="card-body">
+  <div class="card-body">
     <div class="card-title">Hello There</div>
-    <.react_markdown
-      data={@data}
-    >
+    <.react_markdown data={@data} />
   </div>
 </div>
 ```
 
-### `render_to_string`
+### String Rendering with Hydration
+
+Use `render_to_string` when you need client-side hydration:
 
 ```html
 <div class="card w-full">
@@ -166,62 +180,53 @@ Then you can use react server rendered component in Phoenix Component
     <h3 class="card-title">
       This <code class="text-primary">Table</code> is rendered with <code class="text-secondary">react-dom/server</code>
     </h3>
-    <!-- Notice: Remove white space in the react render node or it will break hydrate -->
-    <!-- Add `phx-no-format` to avoid mix format change the code here -->
+    <!-- Notice: Remove whitespace to avoid breaking hydration -->
+    <!-- Add `phx-no-format` to prevent mix format from changing this -->
     <div
       id="system_usage_container"
       class="w-full h-full"
       phx-no-format
-    ><.react_system_stats
-      data={@data}
-    /></div>
+    ><.react_system_stats data={@data} /></div>
   </div>
 </div>
 ```
 
-* Then hydrate on the client.
+#### Client-Side Hydration
 
-```js
-
+```javascript
 document.addEventListener('DOMContentLoaded', function() {
   const store = new Store();
   const domContainer = document.querySelector('#system_usage_container');
+  
   if (domContainer) {
     let channel = socket.channel("system_usage:lobby", {});
 
     channel.join()
-      .receive("ok", resp => { console.log("Joined successfully", resp) })
-      .receive("error", resp => { console.log("Unable to join", resp) });
-
+      .receive("ok", resp => console.log("Joined successfully", resp))
+      .receive("error", resp => console.log("Unable to join", resp));
 
     function Usage(props) {
       const data = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getServerSnapshot);
-
       return <SystemUsage data={data} />;
     }
 
-    let root;
-
     channel.on("joined", (data) => {
-      // console.log("Reset stats: ", data)
-      store.reset(data.data)
-
+      store.reset(data.data);
       requestAnimationFrame(() => {
         hydrateRoot(domContainer, <Usage />);
       });
     });
 
     channel.on("stats", (data) => {
-      // console.log("Stats: ", data)
-      store.unshift(data)
+      store.unshift(data);
     });
-
   }
 });
-
 ```
 
-### `render_to_readable_stream`
+### Streaming Rendering
+
+Use `render_to_readable_stream` for large components or LiveView integration:
 
 ```html
 <div
@@ -229,15 +234,12 @@ document.addEventListener('DOMContentLoaded', function() {
   class="w-full h-full"
   phx-update="ignore"
   phx-hook="LiveFormHook"
-><.react_live_form
-  data={@form_data}
-/></div>
+><.react_live_form data={@form_data} /></div>
 ```
 
-* Work with `LiveView`
+#### LiveView Integration
 
-```js
-
+```javascript
 const hooks = {
   LiveFormHook: {
     mounted() {
@@ -256,6 +258,7 @@ const hooks = {
         formState.reset(data);
         this.reactRoot = hydrateRoot(this.el, <LiveViewForm />);
       });
+      
       this.handleEvent("form:update", (data) => {
         formState.assign(data);
       });
@@ -264,28 +267,45 @@ const hooks = {
 }
 ```
 
-## Run in release mode
+## 🚀 Production Deployment
 
-Bundle components with server.js to one file.
+### Bundling Components
 
+Bundle your React components with the server for production deployment:
+
+#### Bun Runtime
 ```shell
-mix phx.react.bun.bundle --component-base=assets/component --output=priv/react/server.js 
+mix phx.react.bun.bundle --component-base=assets/component --output=priv/react/server.js
 ```
 
-Config `runtime` to `Phoenix.React.Runtime.Bun` in `runtime.exs`
+#### Deno Runtime
+```shell
+mix phx.react.deno.bundle --component-base=assets/component --output=priv/react/server.js
+```
+
+### Production Configuration
+
+Configure the runtime for production in `runtime.exs`:
 
 ```elixir
-
+# For Bun runtime
 config :phoenix_react_server, Phoenix.React.Runtime.Bun,
   cmd: System.find_executable("bun"),
   server_js: Path.expand("../priv/react/server.js", __DIR__),
   port: 12666,
   env: :prod
+
+# For Deno runtime
+config :phoenix_react_server, Phoenix.React.Runtime.Deno,
+  cmd: System.find_executable("deno"),
+  server_js: Path.expand("../priv/react/server.js", __DIR__),
+  port: 12667,
+  env: :prod
 ```
 
-## Hydrate at client side with CDN
+## 🌐 CDN Hydration
 
-Hydrate react component at client side when CDN.
+Hydrate React components on the client side using CDN modules:
 
 ```html
 <script type="importmap">
@@ -307,7 +327,57 @@ hydrateRoot(
 </script>
 ```
 
-# DEMO
+## 🎮 Demo
 
-Path `./react_demo`
+A complete demo application is available in the `./react_demo` directory, showcasing:
+- All rendering methods
+- LiveView integration
+- Client-side hydration
+- File watching in development
+- Production bundling
+
+## 🔧 Advanced Configuration
+
+### Caching Strategy
+
+Configure caching behavior for optimal performance:
+
+```elixir
+config :phoenix_react_server, Phoenix.React,
+  cache_ttl: 300,  # 5 minutes cache
+  gc_time: 60_000  # Cleanup interval in milliseconds
+```
+
+### Security Settings
+
+Configure security limits for component rendering:
+
+```elixir
+config :phoenix_react_server, Phoenix.React.Config,
+  security: %{
+    max_component_name_length: 100,
+    max_request_size: 1_048_576,  # 1MB
+    request_timeout_ms: 30_000
+  }
+```
+
+### File Watching
+
+Configure development file watching:
+
+```elixir
+config :phoenix_react_server, Phoenix.React.Config,
+  file_watcher: %{
+    throttle_ms: 3000,
+    debounce_ms: 100
+  }
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
