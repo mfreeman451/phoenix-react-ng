@@ -139,4 +139,8 @@ defmodule Phoenix.React.Runtime.FileWatcher do
       {:noreply, state}
     end
   end
+
+  def handle_info(_unknown_message, state) do
+    {:noreply, state}
+  end
 end

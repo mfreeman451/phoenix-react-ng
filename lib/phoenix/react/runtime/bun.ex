@@ -162,6 +162,9 @@ defmodule Phoenix.React.Runtime.Bun do
 
     config = config()
 
+    # Use development mode for development builds, production for production builds
+    dev_flag = if config[:env] == :dev, do: "--development", else: ""
+
     bundle_args = [
       "--component-base",
       component_base,
@@ -170,6 +173,13 @@ defmodule Phoenix.React.Runtime.Bun do
       "--cd",
       config[:cd]
     ]
+
+    # Add development flag if in development mode
+    bundle_args = if dev_flag != "" do
+      bundle_args ++ [dev_flag]
+    else
+      bundle_args
+    end
 
     Mix.Tasks.Phx.React.Bun.Bundle.run(bundle_args)
 

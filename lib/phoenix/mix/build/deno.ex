@@ -78,9 +78,28 @@ defmodule Mix.Tasks.Phx.React.Deno.Bundle do
       tmp_file = "#{cd}/server_deno.js"
       File.write!(tmp_file, result)
 
+      # Create deno.json for npm package resolution
+      deno_json_content = ~s({
+        "nodeModulesDir": "auto",
+        "imports": {
+          "react": "npm:react@18",
+          "react-dom/server": "npm:react-dom@18/server",
+          "react-markdown": "npm:react-markdown@9",
+          "remark-gfm": "npm:remark-gfm@4",
+          "std/": "https://deno.land/std@0.224.0/"
+        }
+      })
+
+      deno_json_path = Path.join(cd, "deno.json")
+      File.write!(deno_json_path, deno_json_content)
+
       # Deno 2.x removed bundle, use compile instead
+      # Add node-modules-dir flag for better npm package support
       {out, code} =
-        System.cmd("deno", ["compile", "--output", output, tmp_file], cd: cd)
+        System.cmd("deno", ["compile", "--output", output, "--allow-read", "--allow-env", "--allow-net", "--allow-write", tmp_file], cd: cd)
+
+      # Clean up deno.json after compilation
+      File.rm!(deno_json_path)
 
       Logger.info(~s[cd #{cd}; deno compile --output #{output} #{tmp_file}])
       Logger.info("out #{code}: #{out}")

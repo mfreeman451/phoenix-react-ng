@@ -6,6 +6,48 @@ exclude =
     []
   end
 
+# Dynamic port allocation to prevent conflicts
+defmodule TestPortAllocator do
+  @moduledoc false
+
+  def get_test_port do
+    # Find an available port in the range 12000-12999
+    case find_available_port(12000, 12999) do
+      {:ok, port} -> port
+      {:error, _reason} -> raise "Could not find available test port"
+    end
+  end
+
+  defp find_available_port(start_port, end_port) do
+    port_range = start_port..end_port
+
+    Enum.find_value(port_range, fn port ->
+      case :gen_tcp.listen(port, [:binary, active: false, reuseaddr: true]) do
+        {:ok, socket} ->
+          :gen_tcp.close(socket)
+          {:ok, port}
+        {:error, :eaddrinuse} ->
+          false
+        {:error, _reason} ->
+          false
+      end
+    end) || {:error, :no_available_ports}
+  end
+end
+
+# Get dynamic port for tests
+test_port = TestPortAllocator.get_test_port()
+
+# Configure application environment directly for tests
+Application.put_env(:phoenix_react_server, Phoenix.React, [
+  runtime: Phoenix.React.Runtime.Bun,
+  component_base: Path.expand("../test/fixtures", __DIR__),
+  render_timeout: 10_000,
+  cache_ttl: 60
+])
+
+Application.put_env(:phoenix_react_server, Phoenix.React.Runtime.Bun, port: test_port)
+
 ExUnit.start(exclude: exclude)
 Phoenix.React.start_link([])
 
@@ -13,7 +55,78 @@ ExUnit.after_suite(fn _results ->
   try do
     IO.puts("Stopping runtime ...")
 
+    # Stop the main runtime
     Phoenix.React.stop_runtime()
+
+    # Additional cleanup for any remaining processes
+    try do
+      # Stop FileWatcher if it's still running
+      case Process.whereis(Phoenix.React.Runtime.FileWatcher) do
+        pid when is_pid(pid) ->
+          IO.puts("Stopping FileWatcher process...")
+          GenServer.stop(pid, :normal, 5000)
+        _ ->
+          :ok
+      end
+
+      # Stop Server if it's still running
+      case Process.whereis(Phoenix.React.Server) do
+        pid when is_pid(pid) ->
+          IO.puts("Stopping Server process...")
+          GenServer.stop(pid, :normal, 5000)
+        _ ->
+          :ok
+      end
+
+      # Stop Runtime supervisor if it's still running
+      case Process.whereis(Phoenix.React.Runtime) do
+        pid when is_pid(pid) ->
+          IO.puts("Stopping Runtime process...")
+          GenServer.stop(pid, :normal, 5000)
+        _ ->
+          :ok
+      end
+
+      # Clean up any orphaned Bun processes
+      try do
+        case System.cmd("pgrep", ["-f", "bun.*server.js"]) do
+          {result, 0} ->
+            pids = String.split(String.trim(result), "\n", trim: true)
+
+            for pid <- pids do
+              case Integer.parse(pid) do
+                {pid_num, ""} ->
+                  IO.puts("Cleaning up orphaned Bun process: #{pid_num}")
+                  System.cmd("kill", ["-TERM", "#{pid_num}"])
+                  Process.sleep(50)
+
+                  # Force kill if still running
+                  case System.cmd("kill", ["-0", "#{pid_num}"]) do
+                    {_, 0} ->
+                      System.cmd("kill", ["-9", "#{pid_num}"])
+                      IO.puts("Force killed orphaned Bun process: #{pid_num}")
+                    _ ->
+                      :ok
+                  end
+                _ ->
+                  :ok
+              end
+            end
+          {_result, _} ->
+            # No processes found or pgrep failed
+            :ok
+        end
+      rescue
+        _ -> :ok
+      catch
+        _ -> :ok
+      end
+
+    rescue
+      _ -> :ok
+    catch
+      _ -> :ok
+    end
 
     :ok
   rescue

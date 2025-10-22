@@ -17,7 +17,7 @@ defmodule Mix.Tasks.Phx.React.Bun.Bundle do
   @shortdoc "Bundle components into server.js"
   def run(args) do
     {opts, _argv} =
-      OptionParser.parse!(args, strict: [component_base: :string, output: :string, cd: :string])
+      OptionParser.parse!(args, strict: [component_base: :string, output: :string, cd: :string, development: :boolean])
 
     component_base = Keyword.get(opts, :component_base)
     base_dir = Path.absname(component_base, File.cwd!()) |> Path.expand()
@@ -54,8 +54,28 @@ defmodule Mix.Tasks.Phx.React.Bun.Bundle do
       File.rm!(output)
     end
 
-    {out, code} =
-      System.cmd("bun", ["build", "--target=bun", "--outdir=#{outdir}", tmp_file], cd: cd)
+    # Build with optimizations for production (unless development mode)
+    is_dev = Keyword.get(opts, :development, false)
+
+    build_args = [
+      "build",
+      "--target=bun",
+      "--outdir=#{outdir}",
+      tmp_file
+    ]
+
+    # Add production optimizations unless in development mode
+    build_args = if is_dev do
+      build_args
+    else
+      build_args ++ [
+        "--minify",
+        "--sourcemap=external",
+        "--define=process.env.NODE_ENV=\"production\""
+      ]
+    end
+
+    {out, code} = System.cmd("bun", build_args, cd: cd)
 
     Logger.info(~s[cd #{cd}; bun build --target=bun --outdir=#{outdir} #{tmp_file}])
     Logger.info("out #{code}: #{out}")

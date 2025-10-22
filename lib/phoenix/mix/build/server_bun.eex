@@ -2,6 +2,11 @@ import { serve, readableStreamToJSON, readableStreamToText, escapeHTML } from 'b
 import { renderToReadableStream, renderToString, renderToStaticMarkup } from 'react-dom/server';
 import React from 'react';
 
+// Use production build for smaller bundle size unless in development mode
+if (process.env.NODE_ENV !== 'development') {
+  process.env.NODE_ENV = 'production';
+}
+
 const __comMap = {};
 <%= for {{name, file}, idx} <- Enum.with_index(files) do %>
 import { Component as __component_<%= idx %> } from "<%= file %>";
