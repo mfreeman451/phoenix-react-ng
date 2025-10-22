@@ -1,10 +1,10 @@
-defmodule Phoenix.React.Monitoring do
+defmodule Phoenix.React.Telemetry do
   @moduledoc """
-  Comprehensive monitoring and metrics collection for Phoenix.React runtimes.
+  Comprehensive telemetry and metrics collection for Phoenix.React runtimes.
 
-  This module provides production-ready monitoring capabilities including
+  This module provides production-ready telemetry capabilities including
   performance metrics, health checks, runtime status monitoring, and
-  comprehensive error tracking with Telemetry integration.
+  comprehensive error tracking with structured logging.
 
   ## Features
 
@@ -14,6 +14,7 @@ defmodule Phoenix.React.Monitoring do
   - **Telemetry Integration**: `:telemetry` events for observability
   - **Runtime Status**: Monitor JavaScript runtime process states
   - **Cache Metrics**: Track cache hit/miss ratios and performance
+  - **Structured Logging**: Enhanced log formatting with render duration
 
   ## Telemetry Events
 
@@ -23,10 +24,24 @@ defmodule Phoenix.React.Monitoring do
     - Measurements: `%{duration: duration_ms}`
     - Metadata: `%{component: component, method: method, result: result, timestamp: timestamp}`
 
-  - `[:phoenix, :react, :runtime, :start]` - Fired when runtime starts
-  - `[:phoenix, :react, :runtime, :stop]` - Fired when runtime stops
+  - `[:phoenix, :react, :runtime_startup]` - Fired when runtime starts
+    - Metadata: `%{runtime: runtime_name, port: port, timestamp: timestamp}`
+
+  - `[:phoenix, :react, :runtime_shutdown]` - Fired when runtime stops
+    - Metadata: `%{runtime: runtime_name, reason: reason, timestamp: timestamp}`
+
   - `[:phoenix, :react, :cache, :hit]` - Fired on cache hits
+    - Metadata: `%{component: component, method: method, timestamp: timestamp}`
+
   - `[:phoenix, :react, :cache, :miss]` - Fired on cache misses
+    - Metadata: `%{component: component, method: method, timestamp: timestamp}`
+
+  - `[:phoenix, :react, :file_change]` - Fired on component file changes
+    - Metadata: `%{path: path, action: action, timestamp: timestamp}`
+
+  - `[:phoenix, :react, :build]` - Fired after build operations
+    - Measurements: `%{duration: duration_ms}`
+    - Metadata: `%{runtime: runtime_name, result: result, timestamp: timestamp}`
 
   ## Usage
 
@@ -34,7 +49,7 @@ defmodule Phoenix.React.Monitoring do
 
   ```elixir
   :telemetry.attach_many(
-    "phoenix-react-monitor",
+    "phoenix-react-telemetry",
     [
       [:phoenix, :react, :render],
       [:phoenix, :react, :cache, :hit],
@@ -51,8 +66,8 @@ defmodule Phoenix.React.Monitoring do
 
   ```elixir
   # Check runtime health
-  case Phoenix.React.Monitoring.health_check() do
-    :ok -> :healthy
+  case Phoenix.React.Telemetry.health_check("Bun", 5225) do
+    {:ok, metadata} -> :healthy
     {:error, reason} -> :unhealthy
   end
   ```
@@ -66,12 +81,32 @@ defmodule Phoenix.React.Monitoring do
   - Cache efficiency metrics
   - Runtime resource usage
 
+  ## Logging
+
+  The module provides structured logging for all operations:
+
+  - Render duration: `[Phoenix.React] Rendered <component> in <duration>ms (method: <method>, result: <result>)`
+  - Runtime events: `[Phoenix.React] Runtime <runtime> started on port <port>`
+  - Cache events: `[Phoenix.React] Cache <hit/miss> for <component>`
+
   """
 
   require Logger
 
   @doc """
-  Records a render request with timing information.
+  Records a render request with timing information and logs the render duration.
+
+  ## Parameters
+
+  - `component` - Component name
+  - `method` - Rendering method (`:render_to_string`, `:render_to_static_markup`, or `:render_to_readable_stream`)
+  - `duration_ms` - Render duration in milliseconds
+  - `result` - Result status (`:ok` or `:error`)
+
+  ## Examples
+
+      iex> Phoenix.React.Telemetry.record_render("chart", :render_to_string, 45, :ok)
+      :ok
   """
   @spec record_render(String.t(), atom(), non_neg_integer(), :ok | :error) :: :ok
   def record_render(component, method, duration_ms, result) do
@@ -83,14 +118,24 @@ defmodule Phoenix.React.Monitoring do
       timestamp: DateTime.utc_now()
     }
 
-    Logger.debug("React render: #{inspect(metadata)}")
+    # Enhanced structured logging with clear render duration
+    result_emoji = if result == :ok, do: "✓", else: "✗"
 
-    # Could integrate with telemetry here
+    Logger.info(
+      "[Phoenix.React] #{result_emoji} Rendered '#{component}' in #{duration_ms}ms " <>
+      "(method: #{method}, result: #{result})"
+    )
+
     :telemetry.execute([:phoenix, :react, :render], %{duration: duration_ms}, metadata)
   end
 
   @doc """
   Records a runtime startup event.
+
+  ## Parameters
+
+  - `runtime_name` - Name of the runtime (e.g., "Bun", "Deno")
+  - `port` - Port number the runtime is listening on
   """
   @spec record_runtime_startup(String.t(), non_neg_integer()) :: :ok
   def record_runtime_startup(runtime_name, port) do
@@ -100,12 +145,17 @@ defmodule Phoenix.React.Monitoring do
       timestamp: DateTime.utc_now()
     }
 
-    Logger.info("React runtime started: #{inspect(metadata)}")
+    Logger.info("[Phoenix.React] Runtime #{runtime_name} started on port #{port}")
     :telemetry.execute([:phoenix, :react, :runtime_startup], %{}, metadata)
   end
 
   @doc """
   Records a runtime shutdown event.
+
+  ## Parameters
+
+  - `runtime_name` - Name of the runtime (e.g., "Bun", "Deno")
+  - `reason` - Shutdown reason
   """
   @spec record_runtime_shutdown(String.t(), term()) :: :ok
   def record_runtime_shutdown(runtime_name, reason) do
@@ -115,7 +165,7 @@ defmodule Phoenix.React.Monitoring do
       timestamp: DateTime.utc_now()
     }
 
-    Logger.info("React runtime shutdown: #{inspect(metadata)}")
+    Logger.info("[Phoenix.React] Runtime #{runtime_name} shutdown (reason: #{inspect(reason)})")
     :telemetry.execute([:phoenix, :react, :runtime_shutdown], %{}, metadata)
   end
 
@@ -135,7 +185,13 @@ defmodule Phoenix.React.Monitoring do
   end
 
   @doc """
-  Records a build event.
+  Records a build event with duration.
+
+  ## Parameters
+
+  - `runtime_name` - Name of the runtime (e.g., "Bun", "Deno")
+  - `duration_ms` - Build duration in milliseconds
+  - `result` - Build result (`:ok` or `:error`)
   """
   @spec record_build(String.t(), non_neg_integer(), :ok | :error) :: :ok
   def record_build(runtime_name, duration_ms, result) do
@@ -146,7 +202,12 @@ defmodule Phoenix.React.Monitoring do
       timestamp: DateTime.utc_now()
     }
 
-    Logger.info("React build: #{inspect(metadata)}")
+    result_emoji = if result == :ok, do: "✓", else: "✗"
+
+    Logger.info(
+      "[Phoenix.React] #{result_emoji} Build completed for #{runtime_name} in #{duration_ms}ms (result: #{result})"
+    )
+
     :telemetry.execute([:phoenix, :react, :build], %{duration: duration_ms}, metadata)
   end
 
@@ -224,9 +285,70 @@ defmodule Phoenix.React.Monitoring do
   end
 
   @doc """
-  Measures execution time of a function and records it.
+  Records a cache hit event.
+
+  ## Parameters
+
+  - `component` - Component name
+  - `method` - Rendering method
   """
-  @spec measure(String.t(), atom(), function()) :: any()
+  @spec record_cache_hit(String.t(), atom()) :: :ok
+  def record_cache_hit(component, method) do
+    metadata = %{
+      component: component,
+      method: method,
+      timestamp: DateTime.utc_now()
+    }
+
+    Logger.debug("[Phoenix.React] Cache hit for '#{component}' (method: #{method})")
+    :telemetry.execute([:phoenix, :react, :cache, :hit], %{}, metadata)
+  end
+
+  @doc """
+  Records a cache miss event.
+
+  ## Parameters
+
+  - `component` - Component name
+  - `method` - Rendering method
+  """
+  @spec record_cache_miss(String.t(), atom()) :: :ok
+  def record_cache_miss(component, method) do
+    metadata = %{
+      component: component,
+      method: method,
+      timestamp: DateTime.utc_now()
+    }
+
+    Logger.debug("[Phoenix.React] Cache miss for '#{component}' (method: #{method})")
+    :telemetry.execute([:phoenix, :react, :cache, :miss], %{}, metadata)
+  end
+
+  @doc """
+  Measures execution time of a function and records it with telemetry.
+
+  This function wraps the execution of a given function, measures its duration,
+  and emits telemetry events with the timing information.
+
+  ## Parameters
+
+  - `operation_name` - Descriptive name for the operation being measured
+  - `telemetry_event` - Telemetry event name (list of atoms)
+  - `fun` - Zero-arity function to execute and measure
+
+  ## Returns
+
+  The result of executing `fun`
+
+  ## Examples
+
+      iex> Phoenix.React.Telemetry.measure("render_chart", [:phoenix, :react, :render], fn ->
+      ...>   :timer.sleep(10)
+      ...>   {:ok, "<div>Chart</div>"}
+      ...> end)
+      {:ok, "<div>Chart</div>"}
+  """
+  @spec measure(String.t(), list(atom()), function()) :: any()
   def measure(operation_name, telemetry_event, fun) when is_function(fun, 0) do
     start_time = System.monotonic_time(:millisecond)
 
@@ -241,7 +363,7 @@ defmodule Phoenix.React.Monitoring do
         timestamp: DateTime.utc_now()
       }
 
-      Logger.debug("Operation measured: #{inspect(metadata)}")
+      Logger.debug("[Phoenix.React] Operation '#{operation_name}' completed in #{duration}ms")
       :telemetry.execute(telemetry_event, %{duration: duration}, metadata)
 
       result
@@ -257,7 +379,10 @@ defmodule Phoenix.React.Monitoring do
           timestamp: DateTime.utc_now()
         }
 
-        Logger.error("Operation failed: #{inspect(metadata)}")
+        Logger.error(
+          "[Phoenix.React] Operation '#{operation_name}' failed after #{duration}ms: #{Exception.message(error)}"
+        )
+
         :telemetry.execute(telemetry_event, %{duration: duration}, metadata)
 
         reraise error, __STACKTRACE__

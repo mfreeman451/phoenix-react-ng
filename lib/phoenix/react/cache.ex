@@ -115,7 +115,15 @@ defmodule Phoenix.React.Cache do
   """
   @spec get(String.t(), map(), cache_method()) :: String.t() | nil
   def get(component, props, method) do
-    lookup(component, props, method)
+    case lookup(component, props, method) do
+      nil ->
+        Phoenix.React.Telemetry.record_cache_miss(component, method)
+        nil
+
+      result ->
+        Phoenix.React.Telemetry.record_cache_hit(component, method)
+        result
+    end
   end
 
   @doc """

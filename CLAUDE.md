@@ -24,7 +24,7 @@ The system consists of three main layers:
 - `Phoenix.React.Cache` - ETS-based caching layer with TTL support
 - `Phoenix.React.Helper` - Phoenix.Component integration with multiple rendering modes
 - `Phoenix.React.Config` - Centralized configuration management
-- `Phoenix.React.Monitoring` - Telemetry and performance monitoring
+- `Phoenix.React.Telemetry` - Telemetry and performance monitoring with structured logging
 - `Phoenix.React.Runtime.FileWatcher` - File watching for development hot reload
 
 ### Rendering Flow
@@ -247,6 +247,111 @@ hydrateRoot(container, <MyComponent data={window.data} />);
 - Cache can be disabled by setting `cache_ttl: 0`
 - ETS-based in-memory caching with automatic garbage collection
 - Cache invalidation occurs on component file changes in development
+- Cache hits/misses are automatically tracked via telemetry events
+
+## Telemetry and Monitoring
+
+Phoenix.React includes comprehensive telemetry support via `Phoenix.React.Telemetry` for monitoring performance and tracking events.
+
+### Telemetry Events
+
+The following telemetry events are emitted automatically:
+
+**Render Events** - `[:phoenix, :react, :render]`
+- Measurements: `%{duration: duration_ms}`
+- Metadata: `%{component: component, method: method, result: result, timestamp: timestamp}`
+- Logged as: `[Phoenix.React] ✓ Rendered 'chart' in 45ms (method: render_to_string, result: ok)`
+
+**Cache Events**
+- `[:phoenix, :react, :cache, :hit]` - Fired on cache hits
+- `[:phoenix, :react, :cache, :miss]` - Fired on cache misses
+- Metadata: `%{component: component, method: method, timestamp: timestamp}`
+
+**Runtime Events**
+- `[:phoenix, :react, :runtime_startup]` - Fired when runtime starts
+- `[:phoenix, :react, :runtime_shutdown]` - Fired when runtime stops
+- Metadata: `%{runtime: runtime_name, port: port, timestamp: timestamp}`
+
+**Build Events** - `[:phoenix, :react, :build]`
+- Measurements: `%{duration: duration_ms}`
+- Metadata: `%{runtime: runtime_name, result: result, timestamp: timestamp}`
+
+**File Change Events** - `[:phoenix, :react, :file_change]`
+- Metadata: `%{path: path, action: action, timestamp: timestamp}`
+
+### Attaching Telemetry Handlers
+
+Attach handlers in your application's telemetry module:
+
+```elixir
+defmodule MyApp.Telemetry do
+  def attach_handlers do
+    :telemetry.attach_many(
+      "phoenix-react-telemetry",
+      [
+        [:phoenix, :react, :render],
+        [:phoenix, :react, :cache, :hit],
+        [:phoenix, :react, :cache, :miss],
+        [:phoenix, :react, :runtime_startup],
+        [:phoenix, :react, :build]
+      ],
+      &handle_event/4,
+      %{}
+    )
+  end
+
+  def handle_event([:phoenix, :react, :render], %{duration: duration}, metadata, _config) do
+    # Send to your metrics system (Prometheus, StatsD, etc.)
+    MyMetrics.histogram("phoenix_react.render.duration", duration,
+      tags: ["component:#{metadata.component}", "method:#{metadata.method}"]
+    )
+  end
+
+  def handle_event([:phoenix, :react, :cache, :hit], _measurements, metadata, _config) do
+    MyMetrics.increment("phoenix_react.cache.hits",
+      tags: ["component:#{metadata.component}"]
+    )
+  end
+
+  # ... other handlers
+end
+```
+
+### Structured Logging
+
+All telemetry events are automatically logged with structured formatting:
+
+- **Render Duration**: `[Phoenix.React] ✓ Rendered 'my_component' in 45ms (method: render_to_string, result: ok)`
+- **Runtime Startup**: `[Phoenix.React] Runtime Bun started on port 5225`
+- **Cache Events**: `[Phoenix.React] Cache hit for 'my_component' (method: render_to_string)`
+- **Build Events**: `[Phoenix.React] ✓ Build completed for Bun in 1234ms (result: ok)`
+
+### Health Checks
+
+Use telemetry for runtime health monitoring:
+
+```elixir
+case Phoenix.React.Telemetry.health_check("Bun", 5225) do
+  {:ok, metadata} ->
+    # Runtime is healthy
+    Logger.info("Runtime healthy: #{metadata.response_time_ms}ms")
+
+  {:error, reason} ->
+    # Runtime is unhealthy
+    Logger.error("Runtime unhealthy: #{inspect(reason)}")
+end
+```
+
+### Custom Measurements
+
+Wrap operations with telemetry measurements:
+
+```elixir
+Phoenix.React.Telemetry.measure("custom_operation", [:my_app, :custom], fn ->
+  # Your operation here
+  do_expensive_work()
+end)
+```
 
 ## File Structure
 

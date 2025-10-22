@@ -164,21 +164,30 @@ defmodule Phoenix.React.Server do
         _from,
         %{runtime_process: runtime_process} = state
       ) do
+    start_time = System.monotonic_time(:millisecond)
+
     reply =
       case Cache.get(component, props, :render_to_readable_stream) do
         nil ->
           render_timeout = config()[:render_timeout]
 
-          case GenServer.call(
-                 runtime_process,
-                 {:render_to_readable_stream, component, props},
-                 render_timeout
-               ) do
+          result =
+            GenServer.call(
+              runtime_process,
+              {:render_to_readable_stream, component, props},
+              render_timeout
+            )
+
+          duration = System.monotonic_time(:millisecond) - start_time
+
+          case result do
             {:ok, html} = reply ->
               Cache.put(component, props, :render_to_readable_stream, html)
+              Phoenix.React.Telemetry.record_render(component, :render_to_readable_stream, duration, :ok)
               reply
 
-            reply ->
+            {:error, _} = reply ->
+              Phoenix.React.Telemetry.record_render(component, :render_to_readable_stream, duration, :error)
               reply
           end
 
@@ -194,21 +203,30 @@ defmodule Phoenix.React.Server do
         _from,
         %{runtime_process: runtime_process} = state
       ) do
+    start_time = System.monotonic_time(:millisecond)
+
     reply =
       case Cache.get(component, props, :render_to_string) do
         nil ->
           render_timeout = config()[:render_timeout]
 
-          case GenServer.call(
-                 runtime_process,
-                 {:render_to_string, component, props},
-                 render_timeout
-               ) do
+          result =
+            GenServer.call(
+              runtime_process,
+              {:render_to_string, component, props},
+              render_timeout
+            )
+
+          duration = System.monotonic_time(:millisecond) - start_time
+
+          case result do
             {:ok, html} = reply ->
               Cache.put(component, props, :render_to_string, html)
+              Phoenix.React.Telemetry.record_render(component, :render_to_string, duration, :ok)
               reply
 
-            reply ->
+            {:error, _} = reply ->
+              Phoenix.React.Telemetry.record_render(component, :render_to_string, duration, :error)
               reply
           end
 
@@ -224,21 +242,30 @@ defmodule Phoenix.React.Server do
         _from,
         %{runtime_process: runtime_process} = state
       ) do
+    start_time = System.monotonic_time(:millisecond)
+
     reply =
       case Cache.get(component, props, :render_to_static_markup) do
         nil ->
           render_timeout = config()[:render_timeout]
 
-          case GenServer.call(
-                 runtime_process,
-                 {:render_to_static_markup, component, props},
-                 render_timeout
-               ) do
+          result =
+            GenServer.call(
+              runtime_process,
+              {:render_to_static_markup, component, props},
+              render_timeout
+            )
+
+          duration = System.monotonic_time(:millisecond) - start_time
+
+          case result do
             {:ok, html} = reply ->
               Cache.put(component, props, :render_to_static_markup, html)
+              Phoenix.React.Telemetry.record_render(component, :render_to_static_markup, duration, :ok)
               reply
 
-            reply ->
+            {:error, _} = reply ->
+              Phoenix.React.Telemetry.record_render(component, :render_to_static_markup, duration, :error)
               reply
           end
 

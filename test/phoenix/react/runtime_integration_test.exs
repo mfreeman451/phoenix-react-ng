@@ -180,17 +180,19 @@ defmodule Phoenix.React.RuntimeIntegrationTest do
       assert watcher_config.debounce_ms == 100
     end
 
-    test "monitoring functionality" do
-      # Test monitoring functions don't crash
-      assert :ok = Phoenix.React.Monitoring.record_render("test", :render_to_string, 100, :ok)
-      assert :ok = Phoenix.React.Monitoring.record_runtime_startup("test", 5225)
-      assert :ok = Phoenix.React.Monitoring.record_runtime_shutdown("test", :normal)
-      assert :ok = Phoenix.React.Monitoring.record_file_change("/test/path", "changed")
-      assert :ok = Phoenix.React.Monitoring.record_build("test", 1000, :ok)
+    test "telemetry functionality" do
+      # Test telemetry functions don't crash
+      assert :ok = Phoenix.React.Telemetry.record_render("test", :render_to_string, 100, :ok)
+      assert :ok = Phoenix.React.Telemetry.record_runtime_startup("test", 5225)
+      assert :ok = Phoenix.React.Telemetry.record_runtime_shutdown("test", :normal)
+      assert :ok = Phoenix.React.Telemetry.record_file_change("/test/path", "changed")
+      assert :ok = Phoenix.React.Telemetry.record_build("test", 1000, :ok)
+      assert :ok = Phoenix.React.Telemetry.record_cache_hit("test", :render_to_string)
+      assert :ok = Phoenix.React.Telemetry.record_cache_miss("test", :render_to_string)
 
       # Test measurement function
       result =
-        Phoenix.React.Monitoring.measure("test_op", [:test], fn ->
+        Phoenix.React.Telemetry.measure("test_op", [:test], fn ->
           Process.sleep(10)
           :test_result
         end)
@@ -198,7 +200,7 @@ defmodule Phoenix.React.RuntimeIntegrationTest do
       assert result == :test_result
 
       # Test runtime stats
-      stats = Phoenix.React.Monitoring.get_runtime_stats("test")
+      stats = Phoenix.React.Telemetry.get_runtime_stats("test")
       assert is_map(stats)
       assert stats.runtime == "test"
     end

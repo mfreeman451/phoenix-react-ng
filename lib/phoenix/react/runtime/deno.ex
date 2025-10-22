@@ -113,7 +113,7 @@ defmodule Phoenix.React.Runtime.Deno do
       "Deno.Server started on port: #{inspect(port)} and OS pid: #{get_port_os_pid(port)}"
     )
 
-    Phoenix.React.Monitoring.record_runtime_startup("Deno", config()[:port])
+    Phoenix.React.Telemetry.record_runtime_startup("Deno", config()[:port])
 
     Phoenix.React.Server.set_runtime_process(self())
 
@@ -265,16 +265,16 @@ defmodule Phoenix.React.Runtime.Deno do
     server_port = config()[:port]
     timeout = state.render_timeout
 
-    Phoenix.React.Monitoring.measure(
+    Phoenix.React.Telemetry.measure(
       "render_#{method}_#{component}",
       [:phoenix, :react, :render],
       fn ->
         result = make_http_request(server_port, Atom.to_string(method), component, props, timeout)
 
-        # Record the result for monitoring
+        # Record the result for telemetry
         case result do
-          {:ok, _} -> Phoenix.React.Monitoring.record_render(component, method, 0, :ok)
-          {:error, _} -> Phoenix.React.Monitoring.record_render(component, method, 0, :error)
+          {:ok, _} -> Phoenix.React.Telemetry.record_render(component, method, 0, :ok)
+          {:error, _} -> Phoenix.React.Telemetry.record_render(component, method, 0, :error)
         end
 
         result
@@ -285,7 +285,7 @@ defmodule Phoenix.React.Runtime.Deno do
   @impl true
   def terminate(reason, state) do
     Logger.debug("Deno.Server terminating")
-    Phoenix.React.Monitoring.record_runtime_shutdown("Deno", reason)
+    Phoenix.React.Telemetry.record_runtime_shutdown("Deno", reason)
     cleanup_runtime_process(state.runtime_port, reason)
   end
 end
