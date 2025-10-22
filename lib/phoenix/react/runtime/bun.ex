@@ -175,11 +175,12 @@ defmodule Phoenix.React.Runtime.Bun do
     ]
 
     # Add development flag if in development mode
-    bundle_args = if dev_flag != "" do
-      bundle_args ++ [dev_flag]
-    else
-      bundle_args
-    end
+    bundle_args =
+      if dev_flag != "" do
+        bundle_args ++ [dev_flag]
+      else
+        bundle_args
+      end
 
     Mix.Tasks.Phx.React.Bun.Bundle.run(bundle_args)
 

@@ -96,7 +96,20 @@ defmodule Mix.Tasks.Phx.React.Deno.Bundle do
       # Deno 2.x removed bundle, use compile instead
       # Add node-modules-dir flag for better npm package support
       {out, code} =
-        System.cmd("deno", ["compile", "--output", output, "--allow-read", "--allow-env", "--allow-net", "--allow-write", tmp_file], cd: cd)
+        System.cmd(
+          "deno",
+          [
+            "compile",
+            "--output",
+            output,
+            "--allow-read",
+            "--allow-env",
+            "--allow-net",
+            "--allow-write",
+            tmp_file
+          ],
+          cd: cd
+        )
 
       # Clean up deno.json after compilation
       File.rm!(deno_json_path)

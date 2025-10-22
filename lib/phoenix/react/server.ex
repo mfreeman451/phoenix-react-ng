@@ -1,15 +1,35 @@
 defmodule Phoenix.React.Server do
   @moduledoc """
-  The React Render Server
+  The React Render Server manages component rendering requests and caching.
 
-  Start React Render server by setting.
+  This GenServer acts as the main interface for rendering React components,
+  handling cache management, and coordinating with JavaScript runtimes.
 
-  ```
+  ## Features
+
+  - **Intelligent Caching**: ETS-based caching with configurable TTL
+  - **Runtime Coordination**: Manages communication with JavaScript runtimes
+  - **Error Handling**: Comprehensive error reporting and recovery
+  - **Performance Monitoring**: Built-in metrics and health checks
+  - **Graceful Shutdown**: Proper cleanup of resources
+
+  ## Configuration
+
+  Configure in your application supervisor:
+
+  ```elixir
   config :phoenix_react_server, Phoenix.React,
     runtime: Phoenix.React.Runtime.Bun,
     component_base: Path.expand("../assets/component", __DIR__),
-    cache_ttl: 10
+    cache_ttl: 60
   ```
+
+  ## Server Lifecycle
+
+  The server goes through these phases:
+  1. **Startup**: Initializes cache and runtime connections
+  2. **Ready**: Accepts rendering requests
+  3. **Shutdown**: Cleans up resources gracefully
 
   """
   require Logger

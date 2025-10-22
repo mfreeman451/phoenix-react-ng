@@ -1,12 +1,71 @@
 defmodule Phoenix.React.Monitoring do
   @moduledoc """
-  Monitoring and metrics collection for Phoenix.React runtimes.
+  Comprehensive monitoring and metrics collection for Phoenix.React runtimes.
 
-  This module provides:
-  - Performance metrics collection
-  - Health checks
-  - Runtime status monitoring
-  - Error tracking
+  This module provides production-ready monitoring capabilities including
+  performance metrics, health checks, runtime status monitoring, and
+  comprehensive error tracking with Telemetry integration.
+
+  ## Features
+
+  - **Performance Metrics**: Track render times, success rates, and throughput
+  - **Health Checks**: Monitor runtime process health and responsiveness
+  - **Error Tracking**: Detailed error logging and categorization
+  - **Telemetry Integration**: `:telemetry` events for observability
+  - **Runtime Status**: Monitor JavaScript runtime process states
+  - **Cache Metrics**: Track cache hit/miss ratios and performance
+
+  ## Telemetry Events
+
+  The following telemetry events are emitted:
+
+  - `[:phoenix, :react, :render]` - Fired after each component render
+    - Measurements: `%{duration: duration_ms}`
+    - Metadata: `%{component: component, method: method, result: result, timestamp: timestamp}`
+
+  - `[:phoenix, :react, :runtime, :start]` - Fired when runtime starts
+  - `[:phoenix, :react, :runtime, :stop]` - Fired when runtime stops
+  - `[:phoenix, :react, :cache, :hit]` - Fired on cache hits
+  - `[:phoenix, :react, :cache, :miss]` - Fired on cache misses
+
+  ## Usage
+
+  Attach telemetry handlers to monitor performance:
+
+  ```elixir
+  :telemetry.attach_many(
+    "phoenix-react-monitor",
+    [
+      [:phoenix, :react, :render],
+      [:phoenix, :react, :cache, :hit],
+      [:phoenix, :react, :cache, :miss]
+    ],
+    &MyApp.Telemetry.handle_event/4,
+    %{}
+  )
+  ```
+
+  ## Health Checks
+
+  Use for health monitoring endpoints and alerts:
+
+  ```elixir
+  # Check runtime health
+  case Phoenix.React.Monitoring.health_check() do
+    :ok -> :healthy
+    {:error, reason} -> :unhealthy
+  end
+  ```
+
+  ## Performance Monitoring
+
+  Track component performance over time:
+
+  - Average render times per component
+  - Error rates and failure patterns
+  - Cache efficiency metrics
+  - Runtime resource usage
+
   """
 
   require Logger

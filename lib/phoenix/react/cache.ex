@@ -1,10 +1,42 @@
 defmodule Phoenix.React.Cache do
   @moduledoc """
-  Cache for React Component rendering
+  High-performance ETS-based caching for React component rendering.
 
-  Cache key is a tuple of component, props and static flag
+  This module provides intelligent caching for rendered React components
+  with configurable TTL and automatic cleanup of expired entries.
 
-  Remove expired cache every 60 seconds
+  ## Features
+
+  - **ETS-based Storage**: In-memory caching with O(1) access time
+  - **Configurable TTL**: Time-to-live per cache entry (default: 3600 seconds)
+  - **Automatic Cleanup**: Garbage collection runs every 60 seconds
+  - **Smart Cache Keys**: Based on component name, props, and static flag
+  - **Memory Efficient**: Automatic cleanup prevents memory leaks
+
+  ## Cache Key Structure
+
+  Cache keys are tuples: `{component, props, static_flag}`
+
+  - `component` - The React component name
+  - `props` - Serialized component props
+  - `static_flag` - Whether rendering is static (affects caching strategy)
+
+  ## Configuration
+
+  ```elixir
+  config :phoenix_react_server, Phoenix.React,
+    cache_ttl: 3600  # Cache TTL in seconds (default: 1 hour)
+  ```
+
+  Set `cache_ttl: 0` to disable caching entirely.
+
+  ## Performance
+
+  - Cache hit: O(1) lookup time
+  - Cache miss: Triggers component rendering and stores result
+  - Memory usage: Proportional to number of cached components
+  - Cleanup cost: O(n) where n is number of expired entries
+
   """
   use GenServer
 

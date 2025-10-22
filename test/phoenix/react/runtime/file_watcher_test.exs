@@ -29,6 +29,7 @@ defmodule Phoenix.React.Runtime.FileWatcherTest do
         :exit, {:noproc, _} ->
           # Process might not be available, that's ok for this test
           :ok
+
         :exit, {{:already_started, _pid}, _} ->
           # Already started, that's also ok
           :ok

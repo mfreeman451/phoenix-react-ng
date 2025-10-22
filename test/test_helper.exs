@@ -26,8 +26,10 @@ defmodule TestPortAllocator do
         {:ok, socket} ->
           :gen_tcp.close(socket)
           {:ok, port}
+
         {:error, :eaddrinuse} ->
           false
+
         {:error, _reason} ->
           false
       end
@@ -39,12 +41,12 @@ end
 test_port = TestPortAllocator.get_test_port()
 
 # Configure application environment directly for tests
-Application.put_env(:phoenix_react_server, Phoenix.React, [
+Application.put_env(:phoenix_react_server, Phoenix.React,
   runtime: Phoenix.React.Runtime.Bun,
   component_base: Path.expand("../test/fixtures", __DIR__),
   render_timeout: 10_000,
   cache_ttl: 60
-])
+)
 
 Application.put_env(:phoenix_react_server, Phoenix.React.Runtime.Bun, port: test_port)
 
@@ -65,6 +67,7 @@ ExUnit.after_suite(fn _results ->
         pid when is_pid(pid) ->
           IO.puts("Stopping FileWatcher process...")
           GenServer.stop(pid, :normal, 5000)
+
         _ ->
           :ok
       end
@@ -74,6 +77,7 @@ ExUnit.after_suite(fn _results ->
         pid when is_pid(pid) ->
           IO.puts("Stopping Server process...")
           GenServer.stop(pid, :normal, 5000)
+
         _ ->
           :ok
       end
@@ -83,6 +87,7 @@ ExUnit.after_suite(fn _results ->
         pid when is_pid(pid) ->
           IO.puts("Stopping Runtime process...")
           GenServer.stop(pid, :normal, 5000)
+
         _ ->
           :ok
       end
@@ -105,13 +110,16 @@ ExUnit.after_suite(fn _results ->
                     {_, 0} ->
                       System.cmd("kill", ["-9", "#{pid_num}"])
                       IO.puts("Force killed orphaned Bun process: #{pid_num}")
+
                     _ ->
                       :ok
                   end
+
                 _ ->
                   :ok
               end
             end
+
           {_result, _} ->
             # No processes found or pgrep failed
             :ok
@@ -121,7 +129,6 @@ ExUnit.after_suite(fn _results ->
       catch
         _ -> :ok
       end
-
     rescue
       _ -> :ok
     catch

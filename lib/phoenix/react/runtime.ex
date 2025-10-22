@@ -1,13 +1,53 @@
 defmodule Phoenix.React.Runtime do
   @moduledoc """
-  Phoenix.React.Runtime
+  Dynamic supervisor for JavaScript runtime processes and file watching.
 
-  Manage the runtime of the React Render Server
+  This module manages the lifecycle of JavaScript runtime processes (Bun/Deno)
+  and coordinates file watching for hot reloading in development mode.
 
-  If in dev mode, it will start a file watcher to watch the component directory.
-  Reload the server when the component file changed with a throttle time at `3s`.
+  ## Features
 
-  @behaviour Phoenix.React.Runtime
+  - **Runtime Management**: Supervises JavaScript runtime processes
+  - **Hot Reloading**: Automatic component rebuilding in development
+  - **File Watching**: Monitors component directory changes with throttling
+  - **Graceful Restart**: Handles runtime failures and restarts
+  - **Development Mode**: Enhanced developer experience with live reloading
+
+  ## Runtime Lifecycle
+
+  ### Development Mode
+  1. Starts file watcher for component directory
+  2. Monitors file changes with 3-second throttle
+  3. Triggers automatic runtime restart on component changes
+  4. Provides hot reloading for seamless development
+
+  ### Production Mode
+  1. Starts optimized runtime processes
+  2. No file watching (minimal overhead)
+  3. Uses pre-bundled components for performance
+
+  ## Supported Runtimes
+
+  - **Bun** (`Phoenix.React.Runtime.Bun`): Fast JavaScript runtime
+  - **Deno** (`Phoenix.React.Runtime.Deno`): Secure runtime with npm support
+
+  ## Configuration
+
+  Runtime behavior is controlled via application configuration:
+
+  ```elixir
+  config :phoenix_react_server, Phoenix.React.Runtime.Bun,
+    env: :dev,  # :dev or :prod
+    port: 5225,
+    component_base: "/path/to/components"
+  ```
+
+  ## Performance Considerations
+
+  - Development mode incurs file watching overhead
+  - Throttling prevents excessive rebuilds during rapid changes
+  - Runtime processes are isolated for stability
+  - Automatic restart ensures reliability
 
   """
 

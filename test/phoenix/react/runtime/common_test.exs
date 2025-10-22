@@ -157,8 +157,11 @@ defmodule Phoenix.React.Runtime.CommonTest do
 
     test "handles different bundle modules" do
       # Test with different module types
-      assert :ok = Common.handle_file_change("/test/path", Mix.Tasks.Phx.React.Bun.Bundle, [], 5000)
-      assert :ok = Common.handle_file_change("/test/path", Mix.Tasks.Phx.React.Deno.Bundle, [], 5000)
+      assert :ok =
+               Common.handle_file_change("/test/path", Mix.Tasks.Phx.React.Bun.Bundle, [], 5000)
+
+      assert :ok =
+               Common.handle_file_change("/test/path", Mix.Tasks.Phx.React.Deno.Bundle, [], 5000)
     end
 
     test "accepts various timeout values" do
@@ -237,7 +240,8 @@ defmodule Phoenix.React.Runtime.CommonTest do
 
     test "returns validation error for invalid merged config" do
       defaults = [cmd: "/default/bun", port: 3000, env: :dev]
-      user_config = [port: -1]  # Invalid port
+      # Invalid port
+      user_config = [port: -1]
 
       assert {:error, "Elixir.TestRuntime: :port must be between 1 and 65535"} =
                Common.merge_config(user_config, defaults, TestRuntime)

@@ -1,6 +1,6 @@
-import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
-import React from "npm:react";
-import { renderToReadableStream, renderToString, renderToStaticMarkup } from "npm:react-dom/server";
+import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+import React from "npm:react@18";
+import { renderToReadableStream, renderToString, renderToStaticMarkup } from "npm:react-dom@18/server";
 
 const __comMap = {};
 

@@ -64,7 +64,8 @@ defmodule Phoenix.React.HelperTest do
       [error_html] = result.static
       assert is_binary(error_html)
       # Error messages come directly from the server, so we check it contains error info
-      assert String.contains?(error_html, "Not Found") or String.contains?(error_html, "Failed to")
+      assert String.contains?(error_html, "Not Found") or
+               String.contains?(error_html, "Failed to")
     end
 
     test "renders markdown component successfully" do
@@ -178,13 +179,20 @@ defmodule Phoenix.React.HelperTest do
 
     test "handles complex error terms" do
       # Test with a component that might cause complex errors
-      result = Helper.react_component(%{component: "complex_error", props: %{invalid: :term}, static: true})
+      result =
+        Helper.react_component(%{
+          component: "complex_error",
+          props: %{invalid: :term},
+          static: true
+        })
+
       assert %Phoenix.LiveView.Rendered{} = result
 
       [error_html] = result.static
       assert is_binary(error_html)
       # Error messages come directly from the server, so we check it contains error info
-      assert String.contains?(error_html, "Not Found") or String.contains?(error_html, "Failed to")
+      assert String.contains?(error_html, "Not Found") or
+               String.contains?(error_html, "Failed to")
     end
 
     test "error messages include method name" do
@@ -192,8 +200,8 @@ defmodule Phoenix.React.HelperTest do
       [error_html] = result.static
       # Check for any error indication - errors come as HTML with specific patterns
       assert String.contains?(error_html, "Error:") or
-             String.contains?(error_html, "Not Found") or
-             String.contains?(error_html, "Failed to")
+               String.contains?(error_html, "Not Found") or
+               String.contains?(error_html, "Failed to")
     end
 
     test "error messages include component name" do
@@ -201,17 +209,18 @@ defmodule Phoenix.React.HelperTest do
       [error_html] = result.static
       # Check for any error indication - errors come as HTML with specific patterns
       assert String.contains?(error_html, "Error:") or
-             String.contains?(error_html, "Not Found") or
-             String.contains?(error_html, "Failed to")
+               String.contains?(error_html, "Not Found") or
+               String.contains?(error_html, "Failed to")
     end
   end
 
   describe "logging behavior" do
     test "logs errors when rendering fails" do
       # Capture logs to verify error logging
-      log = ExUnit.CaptureLog.capture_log(fn ->
-        Helper.react_component(%{component: "nonexistent", props: %{}, static: true})
-      end)
+      log =
+        ExUnit.CaptureLog.capture_log(fn ->
+          Helper.react_component(%{component: "nonexistent", props: %{}, static: true})
+        end)
 
       # Check that some error was logged
       assert String.contains?(log, "Failed to") or String.contains?(log, "nonexistent")
@@ -232,7 +241,11 @@ defmodule Phoenix.React.HelperTest do
       # Test that the helper can handle rapid calls without issues
       for _i <- 1..10 do
         assert %Phoenix.LiveView.Rendered{} =
-                 Helper.react_component(%{component: "tab", props: %{tabs: ["fast"]}, static: true})
+                 Helper.react_component(%{
+                   component: "tab",
+                   props: %{tabs: ["fast"]},
+                   static: true
+                 })
       end
     end
 

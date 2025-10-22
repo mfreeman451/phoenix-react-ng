@@ -1,15 +1,22 @@
 defmodule Phoenix.React do
   @moduledoc """
 
-  Run a `react` render server to render react component in `Phoenix` html.
+  Phoenix.React provides high-performance server-side rendering (SSR) for React components
+  within Phoenix applications. It supports both Bun and Deno JavaScript runtimes with
+  intelligent caching and hot reloading capabilities.
 
   **Features**
 
-  - [x] Render to static markup
-  - [x] Render to string
-  - [x] Render to readable stream
-  - [x] Hydrate at client side
-  - [x] Connect to Live View render
+  - [x] Server-side rendering with multiple output formats:
+    - Static markup generation (SEO-friendly)
+    - String rendering with client hydration
+    - Readable stream rendering (LiveView integration)
+  - [x] Dual runtime support (Bun and Deno)
+  - [x] Intelligent caching with TTL management
+  - [x] Hot reloading in development mode
+  - [x] LiveView integration with streaming support
+  - [x] Client-side hydration capabilities
+  - [x] Bundle size optimization (67% smaller than previous versions)
 
   See the [docs](https://hexdocs.pm/phoenix_react_server/) for more information.
 
@@ -21,51 +28,64 @@ defmodule Phoenix.React do
   {:phoenix_react_server, "~> 0.5"},
   ```
 
+  ## Installation
+
+  Add to your dependencies in `mix.exs`:
+
+  ```elixir
+  {:phoenix_react_server, "~> 0.5"},
+  ```
+
   ## Configuration
 
-  Set config, runtime, react components, etc.
+  Configure the runtime, component paths, and caching options:
 
   ```elixir
   import Config
 
   config :phoenix_react_server, Phoenix.React,
-    # react runtime, default to `bun`
+    # Runtime: Bun (default) or Deno
     runtime: Phoenix.React.Runtime.Bun,
-    # react component base path
+    # React component base path
     component_base: Path.expand("../assets/component", __DIR__),
-    # cache ttl, default to 60 seconds
+    # Cache TTL in seconds (default: 60, set to 0 to disable)
     cache_ttl: 60
   ```
 
-   Supported `runtime`
+  ### Supported Runtimes
 
-   - [x] `Phoenix.React.Runtime.Bun`
-   - [x] `Phoenix.React.Runtime.Deno`
+  - **Bun Runtime** (`Phoenix.React.Runtime.Bun`): Fast startup, excellent performance
+  - **Deno Runtime** (`Phoenix.React.Runtime.Deno`): Secure runtime with npm package support
 
-  Add Render Server in your application Supervisor tree.
+  ### Supervisor Configuration
+
+  Add to your application's supervisor tree:
 
   ```elixir
-    def start(_type, _args) do
-      children = [
-        ReactDemoWeb.Telemetry,
-        {DNSCluster, query: Application.get_env(:react_demo, :dns_cluster_query) || :ignore},
-        {Phoenix.PubSub, name: ReactDemo.PubSub},
-        # React render service
-        Phoenix.React,
-        ReactDemoWeb.Endpoint
-      ]
+  def start(_type, _args) do
+    children = [
+      ReactDemoWeb.Telemetry,
+      {DNSCluster, query: Application.get_env(:react_demo, :dns_cluster_query) || :ignore},
+      {Phoenix.PubSub, name: ReactDemo.PubSub},
+      # React render service
+      Phoenix.React,
+      ReactDemoWeb.Endpoint
+    ]
 
-      opts = [strategy: :one_for_one, name: ReactDemo.Supervisor]
-      Supervisor.start_link(children, opts)
-    end
+    opts = [strategy: :one_for_one, name: ReactDemo.Supervisor]
+    Supervisor.start_link(children, opts)
+  end
   ```
 
-  Write Phoenix Component use `react_component`
+  ## Usage Examples
+
+  ### Phoenix Component
+
+  Create Phoenix components that render React components:
 
   ```elixir
   defmodule ReactDemoWeb.ReactComponents do
     use Phoenix.Component
-
     import Phoenix.React.Helper
 
     def react_markdown(assigns) do
@@ -80,63 +100,62 @@ defmodule Phoenix.React do
   end
   ```
 
-  Import in html helpers in `react_demo_web.ex`
+  Import your React components in `lib/your_app_web.ex`:
 
   ```elixir
-    defp html_helpers do
-      quote do
-        # Translation
-        use Gettext, backend: ReactDemoWeb.Gettext
-
-        # HTML escaping functionality
-        import Phoenix.HTML
-        # Core UI components
-        import ReactDemoWeb.CoreComponents
-        import ReactDemoWeb.ReactComponents
-
-        ...
-      end
+  defp html_helpers do
+    quote do
+      # Translation
+      use Gettext, backend: ReactDemoWeb.Gettext
+      # HTML escaping functionality
+      import Phoenix.HTML
+      # Core UI components
+      import ReactDemoWeb.CoreComponents
+      import ReactDemoWeb.ReactComponents
     end
+  end
   ```
 
-  ### `render_to_static_markup`
+  ### Rendering Methods
 
-  Then you can use react server rendered component in Phoenix Component
+  #### Static Markup (SEO-friendly)
+
+  Use `static: true` for SEO-friendly content that doesn't need client-side interaction:
 
   ```html
   <div class="card">
-    <div clas="card-body">
+    <div class="card-body">
       <div class="card-title">Hello There</div>
-      <.react_markdown
-        data={@data}
-      >
+      <.react_markdown data={@data} static={true} />
     </div>
   </div>
   ```
 
-  ### `render_to_string`
+  #### String Rendering with Hydration
+
+  Use `static: false` (default) for components that need client-side interaction:
 
   ```html
   <div class="card w-full">
     <div class="card-body">
       <h3 class="card-title">
-        This <code class="text-primary">Table</code> is rendered with <code class="text-secondary">react-dom/server</code>
+        This <code class="text-primary">Component</code> is rendered with server-side rendering
       </h3>
-      <!-- Notice: Remove white space in the react render node or it will break hydrate -->
-      <div class="w-full h-full" id="system_usage_container"><.react_system_stats
-        data={@data}
-      /></div>
+      <!-- Note: No whitespace between container and component for proper hydration -->
+      <div class="w-full h-full" id="interactive-container"><.react_interactive_component data={@data} /></div>
     </div>
   </div>
   ```
 
-  * Then hydrate on the client.
+  Then hydrate on the client:
 
-  ```js
+  ```javascript
+  import { hydrateRoot } from 'react-dom/client';
 
   document.addEventListener('DOMContentLoaded', function() {
     const store = new Store();
-    const domContainer = document.querySelector('#system_usage_container');
+    const domContainer = document.querySelector('#interactive-container');
+
     if (domContainer) {
       let channel = socket.channel("system_usage:lobby", {});
 
@@ -144,35 +163,28 @@ defmodule Phoenix.React do
         .receive("ok", resp => { console.log("Joined successfully", resp) })
         .receive("error", resp => { console.log("Unable to join", resp) });
 
-
       function Usage(props) {
         const data = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getServerSnapshot);
-
         return <SystemUsage data={data} />;
       }
 
-      let root;
-
       channel.on("joined", (data) => {
-        // console.log("Reset stats: ", data)
-        store.reset(data.data)
-
+        store.reset(data.data);
         requestAnimationFrame(() => {
           hydrateRoot(domContainer, <Usage />);
         });
       });
 
       channel.on("stats", (data) => {
-        // console.log("Stats: ", data)
-        store.unshift(data)
+        store.unshift(data);
       });
-
     }
   });
-
   ```
 
-  ### `render_to_readable_stream`
+  #### Streaming with LiveView
+
+  Use streaming rendering for dynamic LiveView components:
 
   ```html
   <div
@@ -180,15 +192,12 @@ defmodule Phoenix.React do
     class="w-full h-full"
     phx-update="ignore"
     phx-hook="LiveFormHook"
-  ><.react_live_form
-    data={@form_data}
-  /></div>
+  ><.react_live_form data={@form_data} /></div>
   ```
 
-  * Work with `LiveView`
+  Create LiveView hooks for streaming components:
 
-  ```js
-
+  ```javascript
   const hooks = {
     LiveFormHook: {
       mounted() {
@@ -199,7 +208,11 @@ defmodule Phoenix.React do
         };
 
         function LiveViewForm(props) {
-          const data = useSyncExternalStore(formState.subscribe, formState.getSnapshot, formState.getServerSnapshot);
+          const data = useSyncExternalStore(
+            formState.subscribe,
+            formState.getSnapshot,
+            formState.getServerSnapshot
+          );
           return <LiveForm data={data} setData={formState.setData} />;
         }
 
@@ -207,6 +220,7 @@ defmodule Phoenix.React do
           formState.reset(data);
           this.reactRoot = hydrateRoot(this.el, <LiveViewForm />);
         });
+
         this.handleEvent("form:update", (data) => {
           formState.assign(data);
         });
@@ -215,47 +229,47 @@ defmodule Phoenix.React do
   }
   ```
 
-   ## Run in release mode
+  ## Production Deployment
 
-   Bundle components with server.js to one file.
+  Bundle components and server code for production releases.
 
-   ### For Bun runtime
+  ### Production Bundling
 
-   ```shell
-   mix phx.react.bun.bundle --component-base=assets/component --output=priv/react/server.js
-   ```
+  **For Bun Runtime:**
+  ```shell
+  mix phx.react.bun.bundle --component-base=assets/component --output=priv/react/server.js
+  ```
 
-   Config `runtime` to `Phoenix.React.Runtime.Bun` in `runtime.exs`
+  **For Deno Runtime:**
+  ```shell
+  mix phx.react.deno.bundle --component-base=assets/component --output=priv/react/server.js
+  ```
 
-   ```elixir
+  ### Production Configuration
 
-   config :phoenix_react_server, Phoenix.React.Runtime.Bun,
-     cmd: System.find_executable("bun"),
-     server_js: Path.expand("../priv/react/server.js", __DIR__),
-     port: 12666,
-     env: :prod
-   ```
+  Configure in `runtime.exs`:
 
-   ### For Deno runtime
+  **Bun Runtime:**
+  ```elixir
+  config :phoenix_react_server, Phoenix.React.Runtime.Bun,
+    cmd: System.find_executable("bun"),
+    server_js: Path.expand("../priv/react/server.js", __DIR__),
+    port: 12666,
+    env: :prod
+  ```
 
-   ```shell
-   mix phx.react.deno.bundle --component-base=assets/component --output=priv/react/server.js
-   ```
+  **Deno Runtime:**
+  ```elixir
+  config :phoenix_react_server, Phoenix.React.Runtime.Deno,
+    cmd: System.find_executable("deno"),
+    server_js: Path.expand("../priv/react/server.js", __DIR__),
+    port: 12667,
+    env: :prod
+  ```
 
-   Config `runtime` to `Phoenix.React.Runtime.Deno` in `runtime.exs`
+  ## Client-Side Hydration with CDN
 
-   ```elixir
-
-   config :phoenix_react_server, Phoenix.React.Runtime.Deno,
-     cmd: System.find_executable("deno"),
-     server_js: Path.expand("../priv/react/server.js", __DIR__),
-     port: 12667,
-     env: :prod
-   ```
-
-  ## Hydrate at client side with CDN
-
-  Hydrate react component at client side when CDN.
+  Hydrate React components on the client side using CDN modules:
 
   ```html
   <script type="importmap">
@@ -267,24 +281,83 @@ defmodule Phoenix.React do
     }
   </script>
   <script type="module">
-  import { hydrateRoot } from 'react-dom/client';
-  import { Component } from 'app';
+    import { hydrateRoot } from 'react-dom/client';
+    import { App } from 'app';
 
-  hydrateRoot(
-    document.getElementById('app-wrapper'),
-    <App />
-  );
+    hydrateRoot(
+      document.getElementById('app-wrapper'),
+      <App />
+    );
   </script>
   ```
 
+  ## React Component Structure
+
+  React components should be placed in your configured `component_base` directory
+  and export a default `Component` function:
+
+  ```javascript
+  // assets/component/my_component.js
+  import React from 'react';
+
+  export function Component({ title, children }) {
+    return (
+      <div className="my-component">
+        <h1>{title}</h1>
+        {children}
+      </div>
+    );
+  }
+  ```
+
+  ## Performance Considerations
+
+  - **Bundle Size**: Components are optimized with 67% size reduction
+  - **Caching**: Intelligent caching with configurable TTL
+  - **Hot Reloading**: Automatic in development mode
+  - **Streaming**: Support for LiveView integration with streaming
+
   """
+
   use Supervisor
 
+  @doc """
+  Starts the Phoenix.React supervisor.
+
+  ## Parameters
+
+  - `init_arg` - Initialization arguments (typically `[]`)
+
+  ## Returns
+
+  - `{:ok, pid}` - Supervisor started successfully
+  - `{:error, reason}` - Failed to start supervisor
+
+  ## Example
+
+      iex> Phoenix.React.start_link([])
+      {:ok, #PID<0.123.0>}
+  """
+  @spec start_link(term()) :: GenServer.on_start()
   def start_link(init_arg) do
     Supervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
   end
 
+  @doc """
+  Initializes the Phoenix.React supervisor with child processes.
+
+  ## Children
+
+  - `Phoenix.React.Cache` - ETS-based caching for rendered components
+  - `Phoenix.React.Runtime` - Dynamic supervisor for JavaScript runtimes
+  - `Phoenix.React.Server` - GenServer handling rendering requests
+
+  ## Returns
+
+  - `{:ok, children}` - Supervisor initialized successfully
+  """
   @impl true
+  @spec init(term()) :: {:ok, {:supervisor.sup_flags(), [:supervisor.child_spec()]}} | :ignore
   def init(_init_arg) do
     # Start HTTP client for runtime communication
     {:ok, _} = Application.ensure_all_started(:inets)
