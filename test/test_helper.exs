@@ -41,29 +41,29 @@ end
 test_port = TestPortAllocator.get_test_port()
 
 # Configure application environment directly for tests
-Application.put_env(:phoenix_react_server, Phoenix.React,
-  runtime: Phoenix.React.Runtime.Bun,
+Application.put_env(:phoenix_react_server, Phoenix.ReactServer,
+  runtime: Phoenix.ReactServer.Runtime.Bun,
   component_base: Path.expand("../test/fixtures", __DIR__),
   render_timeout: 10_000,
   cache_ttl: 60
 )
 
-Application.put_env(:phoenix_react_server, Phoenix.React.Runtime.Bun, port: test_port)
+Application.put_env(:phoenix_react_server, Phoenix.ReactServer.Runtime.Bun, port: test_port)
 
 ExUnit.start(exclude: exclude)
-Phoenix.React.start_link([])
+Phoenix.ReactServer.start_link([])
 
 ExUnit.after_suite(fn _results ->
   try do
     IO.puts("Stopping runtime ...")
 
     # Stop the main runtime
-    Phoenix.React.stop_runtime()
+    Phoenix.ReactServer.stop_runtime()
 
     # Additional cleanup for any remaining processes
     try do
       # Stop FileWatcher if it's still running
-      case Process.whereis(Phoenix.React.Runtime.FileWatcher) do
+      case Process.whereis(Phoenix.ReactServer.Runtime.FileWatcher) do
         pid when is_pid(pid) ->
           IO.puts("Stopping FileWatcher process...")
           GenServer.stop(pid, :normal, 5000)
@@ -73,7 +73,7 @@ ExUnit.after_suite(fn _results ->
       end
 
       # Stop Server if it's still running
-      case Process.whereis(Phoenix.React.Server) do
+      case Process.whereis(Phoenix.ReactServer.Server) do
         pid when is_pid(pid) ->
           IO.puts("Stopping Server process...")
           GenServer.stop(pid, :normal, 5000)
@@ -83,7 +83,7 @@ ExUnit.after_suite(fn _results ->
       end
 
       # Stop Runtime supervisor if it's still running
-      case Process.whereis(Phoenix.React.Runtime) do
+      case Process.whereis(Phoenix.ReactServer.Runtime) do
         pid when is_pid(pid) ->
           IO.puts("Stopping Runtime process...")
           GenServer.stop(pid, :normal, 5000)

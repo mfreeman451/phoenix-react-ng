@@ -1,9 +1,9 @@
-defmodule Phoenix.React.RuntimeIntegrationTest do
+defmodule Phoenix.ReactServer.RuntimeIntegrationTest do
   use ExUnit.Case, async: false
 
-  alias Phoenix.React.Runtime.Bun
-  alias Phoenix.React.Runtime.Deno
-  alias Phoenix.React.Config
+  alias Phoenix.ReactServer.Runtime.Bun
+  alias Phoenix.ReactServer.Runtime.Deno
+  alias Phoenix.ReactServer.Config
 
   @moduletag :integration
 
@@ -182,17 +182,17 @@ defmodule Phoenix.React.RuntimeIntegrationTest do
 
     test "telemetry functionality" do
       # Test telemetry functions don't crash
-      assert :ok = Phoenix.React.Telemetry.record_render("test", :render_to_string, 100, :ok)
-      assert :ok = Phoenix.React.Telemetry.record_runtime_startup("test", 5225)
-      assert :ok = Phoenix.React.Telemetry.record_runtime_shutdown("test", :normal)
-      assert :ok = Phoenix.React.Telemetry.record_file_change("/test/path", "changed")
-      assert :ok = Phoenix.React.Telemetry.record_build("test", 1000, :ok)
-      assert :ok = Phoenix.React.Telemetry.record_cache_hit("test", :render_to_string)
-      assert :ok = Phoenix.React.Telemetry.record_cache_miss("test", :render_to_string)
+      assert :ok = Phoenix.ReactServer.Telemetry.record_render("test", :render_to_string, 100, :ok)
+      assert :ok = Phoenix.ReactServer.Telemetry.record_runtime_startup("test", 5225)
+      assert :ok = Phoenix.ReactServer.Telemetry.record_runtime_shutdown("test", :normal)
+      assert :ok = Phoenix.ReactServer.Telemetry.record_file_change("/test/path", "changed")
+      assert :ok = Phoenix.ReactServer.Telemetry.record_build("test", 1000, :ok)
+      assert :ok = Phoenix.ReactServer.Telemetry.record_cache_hit("test", :render_to_string)
+      assert :ok = Phoenix.ReactServer.Telemetry.record_cache_miss("test", :render_to_string)
 
       # Test measurement function
       result =
-        Phoenix.React.Telemetry.measure("test_op", [:test], fn ->
+        Phoenix.ReactServer.Telemetry.measure("test_op", [:test], fn ->
           Process.sleep(10)
           :test_result
         end)
@@ -200,7 +200,7 @@ defmodule Phoenix.React.RuntimeIntegrationTest do
       assert result == :test_result
 
       # Test runtime stats
-      stats = Phoenix.React.Telemetry.get_runtime_stats("test")
+      stats = Phoenix.ReactServer.Telemetry.get_runtime_stats("test")
       assert is_map(stats)
       assert stats.runtime == "test"
     end

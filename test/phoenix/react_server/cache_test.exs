@@ -1,7 +1,7 @@
-defmodule Phoenix.React.CacheTest do
+defmodule Phoenix.ReactServer.CacheTest do
   use ExUnit.Case, async: true
 
-  alias Phoenix.React.Cache
+  alias Phoenix.ReactServer.Cache
 
   setup_all do
     on_exit(fn ->
@@ -25,7 +25,7 @@ defmodule Phoenix.React.CacheTest do
 
   test "gc" do
     assert true == Cache.put("tab", %{}, :static_markup, ~s[<div class="tab"></div>], ttl: 1)
-    Process.send(Phoenix.React.Cache, :gc, [:noconnect])
+    Process.send(Phoenix.ReactServer.Cache, :gc, [:noconnect])
     Process.sleep(2_000)
     assert nil == Cache.get("tab", %{}, :static_markup)
   end

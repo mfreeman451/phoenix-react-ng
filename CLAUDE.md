@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Phoenix.React** is a Phoenix framework package that enables server-side rendering of React components within Phoenix HTML templates. It provides a rendering server that can render React components to static markup, strings, or readable streams, with support for client-side hydration.
+**Phoenix.ReactServer** is a Phoenix framework package that enables server-side rendering of React components within Phoenix HTML templates. It provides a rendering server that can render React components to static markup, strings, or readable streams, with support for client-side hydration.
 
 ## Architecture
 
@@ -16,22 +16,22 @@ The system consists of three main layers:
 
 ### Core Components
 
-- `Phoenix.React` - Main supervisor and public API
-- `Phoenix.React.Server` - GenServer that manages rendering requests and caching
-- `Phoenix.React.Runtime` - Dynamic supervisor for runtime processes
-- `Phoenix.React.Runtime.Bun` - Bun-based runtime implementation with hot reloading
-- `Phoenix.React.Runtime.Deno` - Deno-based runtime implementation with enhanced security
-- `Phoenix.React.Cache` - ETS-based caching layer with TTL support
-- `Phoenix.React.Helper` - Phoenix.Component integration with multiple rendering modes
-- `Phoenix.React.Config` - Centralized configuration management
-- `Phoenix.React.Telemetry` - Telemetry and performance monitoring with structured logging
-- `Phoenix.React.Runtime.FileWatcher` - File watching for development hot reload
+- `Phoenix.ReactServer` - Main supervisor and public API
+- `Phoenix.ReactServer.Server` - GenServer that manages rendering requests and caching
+- `Phoenix.ReactServer.Runtime` - Dynamic supervisor for runtime processes
+- `Phoenix.ReactServer.Runtime.Bun` - Bun-based runtime implementation with hot reloading
+- `Phoenix.ReactServer.Runtime.Deno` - Deno-based runtime implementation with enhanced security
+- `Phoenix.ReactServer.Cache` - ETS-based caching layer with TTL support
+- `Phoenix.ReactServer.Helper` - Phoenix.Component integration with multiple rendering modes
+- `Phoenix.ReactServer.Config` - Centralized configuration management
+- `Phoenix.ReactServer.Telemetry` - Telemetry and performance monitoring with structured logging
+- `Phoenix.ReactServer.Runtime.FileWatcher` - File watching for development hot reload
 
 ### Rendering Flow
 
 1. Phoenix component calls `react_component/1` with component name and props
-2. Request flows through `Phoenix.React.Helper` which determines render method
-3. Request goes to `Phoenix.React.Server` which handles caching and runtime management
+2. Request flows through `Phoenix.ReactServer.Helper` which determines render method
+3. Request goes to `Phoenix.ReactServer.Server` which handles caching and runtime management
 4. Cache layer checked first (if enabled with TTL > 0)
 5. Runtime process (Bun or Deno) renders the React component via HTTP API
 6. Result cached (if enabled) and returned as HTML string/stream
@@ -39,13 +39,13 @@ The system consists of three main layers:
 
 ### Dual Runtime Support
 
-**Bun Runtime** (`Phoenix.React.Runtime.Bun`)
+**Bun Runtime** (`Phoenix.ReactServer.Runtime.Bun`)
 - Fast JavaScript runtime with built-in bundler
 - Development mode with hot reloading and file watching
 - Components use `.js` file extension with JSX syntax
 - Default runtime, optimized for development speed
 
-**Deno Runtime** (`Phoenix.React.Runtime.Deno`)
+**Deno Runtime** (`Phoenix.ReactServer.Runtime.Deno`)
 - Secure runtime with enhanced security features
 - Components must use `.jsx` file extension for proper JSX parsing
 - Enhanced monitoring and metrics collection
@@ -115,15 +115,15 @@ REACT_RUNTIME=deno mix test
 ### Basic Setup
 ```elixir
 # In config/config.exs
-config :phoenix_react_server, Phoenix.React,
-  runtime: Phoenix.React.Runtime.Bun,
+config :phoenix_react_server, Phoenix.ReactServer,
+  runtime: Phoenix.ReactServer.Runtime.Bun,
   component_base: Path.expand("../assets/component", __DIR__),
   render_timeout: 5_000,
   cache_ttl: 600
 
 # In application supervision tree
 children = [
-  Phoenix.React,
+  Phoenix.ReactServer,
   # ... other children
 ]
 ```
@@ -133,25 +133,25 @@ children = [
 # Environment-based runtime switching
 runtime =
   case System.get_env("REACT_RUNTIME", "bun") do
-    "bun" -> Phoenix.React.Runtime.Bun
-    "deno" -> Phoenix.React.Runtime.Deno
-    _ -> Phoenix.React.Runtime.Bun
+    "bun" -> Phoenix.ReactServer.Runtime.Bun
+    "deno" -> Phoenix.ReactServer.Runtime.Deno
+    _ -> Phoenix.ReactServer.Runtime.Bun
   end
 
-config :phoenix_react_server, Phoenix.React, runtime: runtime
+config :phoenix_react_server, Phoenix.ReactServer, runtime: runtime
 ```
 
 ### Production Configuration
 ```elixir
 # In runtime.exs for Bun runtime
-config :phoenix_react_server, Phoenix.React.Runtime.Bun,
+config :phoenix_react_server, Phoenix.ReactServer.Runtime.Bun,
   cmd: System.find_executable("bun"),
   server_js: Path.expand("../priv/react/server.js", __DIR__),
   port: 12666,
   env: :prod
 
 # In runtime.exs for Deno runtime
-config :phoenix_react_server, Phoenix.React.Runtime.Deno,
+config :phoenix_react_server, Phoenix.ReactServer.Runtime.Deno,
   cmd: System.find_executable("deno"),
   server_js: Path.expand("../priv/react/server.js", __DIR__),
   port: 12667,
@@ -160,7 +160,7 @@ config :phoenix_react_server, Phoenix.React.Runtime.Deno,
 
 ### Security Configuration
 ```elixir
-config :phoenix_react_server, Phoenix.React.Config,
+config :phoenix_react_server, Phoenix.ReactServer.Config,
   security: %{
     max_component_name_length: 100,
     max_request_size: 1_048_576,  # 1MB
@@ -251,7 +251,7 @@ hydrateRoot(container, <MyComponent data={window.data} />);
 
 ## Telemetry and Monitoring
 
-Phoenix.React includes comprehensive telemetry support via `Phoenix.React.Telemetry` for monitoring performance and tracking events.
+Phoenix.ReactServer includes comprehensive telemetry support via `Phoenix.ReactServer.Telemetry` for monitoring performance and tracking events.
 
 ### Telemetry Events
 
@@ -260,7 +260,7 @@ The following telemetry events are emitted automatically:
 **Render Events** - `[:phoenix, :react, :render]`
 - Measurements: `%{duration: duration_ms}`
 - Metadata: `%{component: component, method: method, result: result, timestamp: timestamp}`
-- Logged as: `[Phoenix.React] ✓ Rendered 'chart' in 45ms (method: render_to_string, result: ok)`
+- Logged as: `[Phoenix.ReactServer] ✓ Rendered 'chart' in 45ms (method: render_to_string, result: ok)`
 
 **Cache Events**
 - `[:phoenix, :react, :cache, :hit]` - Fired on cache hits
@@ -321,17 +321,17 @@ end
 
 All telemetry events are automatically logged with structured formatting:
 
-- **Render Duration**: `[Phoenix.React] ✓ Rendered 'my_component' in 45ms (method: render_to_string, result: ok)`
-- **Runtime Startup**: `[Phoenix.React] Runtime Bun started on port 5225`
-- **Cache Events**: `[Phoenix.React] Cache hit for 'my_component' (method: render_to_string)`
-- **Build Events**: `[Phoenix.React] ✓ Build completed for Bun in 1234ms (result: ok)`
+- **Render Duration**: `[Phoenix.ReactServer] ✓ Rendered 'my_component' in 45ms (method: render_to_string, result: ok)`
+- **Runtime Startup**: `[Phoenix.ReactServer] Runtime Bun started on port 5225`
+- **Cache Events**: `[Phoenix.ReactServer] Cache hit for 'my_component' (method: render_to_string)`
+- **Build Events**: `[Phoenix.ReactServer] ✓ Build completed for Bun in 1234ms (result: ok)`
 
 ### Health Checks
 
 Use telemetry for runtime health monitoring:
 
 ```elixir
-case Phoenix.React.Telemetry.health_check("Bun", 5225) do
+case Phoenix.ReactServer.Telemetry.health_check("Bun", 5225) do
   {:ok, metadata} ->
     # Runtime is healthy
     Logger.info("Runtime healthy: #{metadata.response_time_ms}ms")
@@ -347,7 +347,7 @@ end
 Wrap operations with telemetry measurements:
 
 ```elixir
-Phoenix.React.Telemetry.measure("custom_operation", [:my_app, :custom], fn ->
+Phoenix.ReactServer.Telemetry.measure("custom_operation", [:my_app, :custom], fn ->
   # Your operation here
   do_expensive_work()
 end)
@@ -377,7 +377,7 @@ test/                              # Test suite
 ```elixir
 defmodule MyAppWeb.ReactComponents do
   use Phoenix.Component
-  import Phoenix.React.Helper
+  import Phoenix.ReactServer.Helper
 
   def react_my_component(assigns) do
     {static, props} = Map.pop(assigns, :static, false)

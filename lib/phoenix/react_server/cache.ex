@@ -1,4 +1,4 @@
-defmodule Phoenix.React.Cache do
+defmodule Phoenix.ReactServer.Cache do
   @moduledoc """
   High-performance ETS-based caching for React component rendering.
 
@@ -24,7 +24,7 @@ defmodule Phoenix.React.Cache do
   ## Configuration
 
   ```elixir
-  config :phoenix_react_server, Phoenix.React,
+  config :phoenix_react_server, Phoenix.ReactServer,
     cache_ttl: 3600  # Cache TTL in seconds (default: 1 hour)
   ```
 
@@ -42,7 +42,7 @@ defmodule Phoenix.React.Cache do
 
   @ets_table_name :react_component_cache
 
-  @default_ttl Application.compile_env(:phoenix_react_server, Phoenix.React, [])
+  @default_ttl Application.compile_env(:phoenix_react_server, Phoenix.ReactServer, [])
                |> Keyword.get(:cache_ttl, 3600)
 
   def start_link(_) do
@@ -76,7 +76,7 @@ defmodule Phoenix.React.Cache do
   defp schedule_work do
     # Every 60 seconds by default
     gc_time =
-      Application.get_env(:phoenix_react_server, Phoenix.React)
+      Application.get_env(:phoenix_react_server, Phoenix.ReactServer)
       |> Keyword.get(:gc_time, 60_000)
 
     Process.send_after(self(), :gc, gc_time)
@@ -110,18 +110,18 @@ defmodule Phoenix.React.Cache do
 
   ## Example
 
-      iex> Phoenix.React.Cache.get("chart", %{"data" => [1,2,3]}, :render_to_string)
+      iex> Phoenix.ReactServer.Cache.get("chart", %{"data" => [1,2,3]}, :render_to_string)
       "<div>...</div>"
   """
   @spec get(String.t(), map(), cache_method()) :: String.t() | nil
   def get(component, props, method) do
     case lookup(component, props, method) do
       nil ->
-        Phoenix.React.Telemetry.record_cache_miss(component, method)
+        Phoenix.ReactServer.Telemetry.record_cache_miss(component, method)
         nil
 
       result ->
-        Phoenix.React.Telemetry.record_cache_hit(component, method)
+        Phoenix.ReactServer.Telemetry.record_cache_hit(component, method)
         result
     end
   end
@@ -143,7 +143,7 @@ defmodule Phoenix.React.Cache do
 
   ## Example
 
-      iex> Phoenix.React.Cache.put("chart", %{"data" => [1,2,3]}, :render_to_string, "<div>...</div>", ttl: 300)
+      iex> Phoenix.ReactServer.Cache.put("chart", %{"data" => [1,2,3]}, :render_to_string, "<div>...</div>", ttl: 300)
       true
   """
   @spec put(String.t(), map(), cache_method(), String.t(), keyword()) :: true
@@ -169,7 +169,7 @@ defmodule Phoenix.React.Cache do
 
   ## Example
 
-      iex> Phoenix.React.Cache.delete_cache("chart", %{"data" => [1,2,3]}, :render_to_string)
+      iex> Phoenix.ReactServer.Cache.delete_cache("chart", %{"data" => [1,2,3]}, :render_to_string)
       true
   """
   @spec delete_cache(String.t(), map(), cache_method()) :: true

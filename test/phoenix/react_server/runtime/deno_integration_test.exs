@@ -1,7 +1,7 @@
-defmodule Phoenix.React.Runtime.DenoIntegrationTest do
+defmodule Phoenix.ReactServer.Runtime.DenoIntegrationTest do
   use ExUnit.Case, async: false
 
-  alias Phoenix.React.Runtime.Deno
+  alias Phoenix.ReactServer.Runtime.Deno
 
   describe "integration tests" do
     @describetag :integration
@@ -49,7 +49,7 @@ defmodule Phoenix.React.Runtime.DenoIntegrationTest do
     end
 
     test "get_rendered_component handles all render methods" do
-      state = %Phoenix.React.Runtime{
+      state = %Phoenix.ReactServer.Runtime{
         component_base: "/tmp/components",
         render_timeout: 5000,
         server_js: "/tmp/server.js",
@@ -67,7 +67,7 @@ defmodule Phoenix.React.Runtime.DenoIntegrationTest do
     end
 
     test "runtime state structure is valid" do
-      state = %Phoenix.React.Runtime{
+      state = %Phoenix.ReactServer.Runtime{
         component_base: "/test/components",
         render_timeout: 30000,
         server_js: "/test/server.js",

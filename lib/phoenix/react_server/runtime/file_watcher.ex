@@ -1,4 +1,4 @@
-defmodule Phoenix.React.Runtime.FileWatcher do
+defmodule Phoenix.ReactServer.Runtime.FileWatcher do
   @moduledoc """
   File system watcher for React components in development.
 

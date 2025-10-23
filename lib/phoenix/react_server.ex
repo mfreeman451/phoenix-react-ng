@@ -1,7 +1,7 @@
-defmodule Phoenix.React do
+defmodule Phoenix.ReactServer do
   @moduledoc """
 
-  Phoenix.React provides high-performance server-side rendering (SSR) for React components
+  Phoenix.ReactServer provides high-performance server-side rendering (SSR) for React components
   within Phoenix applications. It supports both Bun and Deno JavaScript runtimes with
   intelligent caching and hot reloading capabilities.
 
@@ -43,9 +43,9 @@ defmodule Phoenix.React do
   ```elixir
   import Config
 
-  config :phoenix_react_server, Phoenix.React,
+  config :phoenix_react_server, Phoenix.ReactServer,
     # Runtime: Bun (default) or Deno
-    runtime: Phoenix.React.Runtime.Bun,
+    runtime: Phoenix.ReactServer.Runtime.Bun,
     # React component base path
     component_base: Path.expand("../assets/component", __DIR__),
     # Cache TTL in seconds (default: 60, set to 0 to disable)
@@ -54,8 +54,8 @@ defmodule Phoenix.React do
 
   ### Supported Runtimes
 
-  - **Bun Runtime** (`Phoenix.React.Runtime.Bun`): Fast startup, excellent performance
-  - **Deno Runtime** (`Phoenix.React.Runtime.Deno`): Secure runtime with npm package support
+  - **Bun Runtime** (`Phoenix.ReactServer.Runtime.Bun`): Fast startup, excellent performance
+  - **Deno Runtime** (`Phoenix.ReactServer.Runtime.Deno`): Secure runtime with npm package support
 
   ### Supervisor Configuration
 
@@ -68,7 +68,7 @@ defmodule Phoenix.React do
       {DNSCluster, query: Application.get_env(:react_demo, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: ReactDemo.PubSub},
       # React render service
-      Phoenix.React,
+      Phoenix.ReactServer,
       ReactDemoWeb.Endpoint
     ]
 
@@ -86,7 +86,7 @@ defmodule Phoenix.React do
   ```elixir
   defmodule ReactDemoWeb.ReactComponents do
     use Phoenix.Component
-    import Phoenix.React.Helper
+    import Phoenix.ReactServer.Helper
 
     def react_markdown(assigns) do
       {static, props} = Map.pop(assigns, :static, true)
@@ -251,7 +251,7 @@ defmodule Phoenix.React do
 
   **Bun Runtime:**
   ```elixir
-  config :phoenix_react_server, Phoenix.React.Runtime.Bun,
+  config :phoenix_react_server, Phoenix.ReactServer.Runtime.Bun,
     cmd: System.find_executable("bun"),
     server_js: Path.expand("../priv/react/server.js", __DIR__),
     port: 12666,
@@ -260,7 +260,7 @@ defmodule Phoenix.React do
 
   **Deno Runtime:**
   ```elixir
-  config :phoenix_react_server, Phoenix.React.Runtime.Deno,
+  config :phoenix_react_server, Phoenix.ReactServer.Runtime.Deno,
     cmd: System.find_executable("deno"),
     server_js: Path.expand("../priv/react/server.js", __DIR__),
     port: 12667,
@@ -322,7 +322,7 @@ defmodule Phoenix.React do
   use Supervisor
 
   @doc """
-  Starts the Phoenix.React supervisor.
+  Starts the Phoenix.ReactServer supervisor.
 
   ## Parameters
 
@@ -335,7 +335,7 @@ defmodule Phoenix.React do
 
   ## Example
 
-      iex> Phoenix.React.start_link([])
+      iex> Phoenix.ReactServer.start_link([])
       {:ok, #PID<0.123.0>}
   """
   @spec start_link(term()) :: GenServer.on_start()
@@ -344,13 +344,13 @@ defmodule Phoenix.React do
   end
 
   @doc """
-  Initializes the Phoenix.React supervisor with child processes.
+  Initializes the Phoenix.ReactServer supervisor with child processes.
 
   ## Children
 
-  - `Phoenix.React.Cache` - ETS-based caching for rendered components
-  - `Phoenix.React.Runtime` - Dynamic supervisor for JavaScript runtimes
-  - `Phoenix.React.Server` - GenServer handling rendering requests
+  - `Phoenix.ReactServer.Cache` - ETS-based caching for rendered components
+  - `Phoenix.ReactServer.Runtime` - Dynamic supervisor for JavaScript runtimes
+  - `Phoenix.ReactServer.Server` - GenServer handling rendering requests
 
   ## Returns
 
@@ -376,9 +376,9 @@ defmodule Phoenix.React do
     end
 
     children = [
-      {Phoenix.React.Cache, []},
-      {Phoenix.React.Runtime, []},
-      {Phoenix.React.Server, []}
+      {Phoenix.ReactServer.Cache, []},
+      {Phoenix.ReactServer.Runtime, []},
+      {Phoenix.ReactServer.Server, []}
     ]
 
     Supervisor.init(children, strategy: :one_for_one)
@@ -431,7 +431,7 @@ defmodule Phoenix.React do
   @type render_result :: {:ok, String.t()} | {:error, term()}
 
   @typedoc """
-  Configuration options for Phoenix.React.
+  Configuration options for Phoenix.ReactServer.
   """
   @type config :: %{
           optional(:runtime) => module(),
@@ -458,13 +458,13 @@ defmodule Phoenix.React do
 
   ## Example
 
-      iex> Phoenix.React.render_to_readable_stream("chart", %{"data" => [1, 2, 3]})
+      iex> Phoenix.ReactServer.render_to_readable_stream("chart", %{"data" => [1, 2, 3]})
       {:ok, "<div>...</div>"}
   """
   @spec render_to_readable_stream(component(), props()) :: render_result()
   def render_to_readable_stream(component, props \\ %{}) do
     server = find_server_pid()
-    timeout = Phoenix.React.Server.config()[:render_timeout]
+    timeout = Phoenix.ReactServer.Server.config()[:render_timeout]
     GenServer.call(server, {:render_to_readable_stream, component, props}, timeout)
   rescue
     error ->
@@ -489,13 +489,13 @@ defmodule Phoenix.React do
 
   ## Example
 
-      iex> Phoenix.React.render_to_string("chart", %{"data" => [1, 2, 3]})
+      iex> Phoenix.ReactServer.render_to_string("chart", %{"data" => [1, 2, 3]})
       {:ok, "<div data-reactroot=\"\">...</div>"}
   """
   @spec render_to_string(component(), props()) :: render_result()
   def render_to_string(component, props \\ %{}) do
     server = find_server_pid()
-    timeout = Phoenix.React.Server.config()[:render_timeout]
+    timeout = Phoenix.ReactServer.Server.config()[:render_timeout]
     GenServer.call(server, {:render_to_string, component, props}, timeout)
   rescue
     error ->
@@ -521,13 +521,13 @@ defmodule Phoenix.React do
 
   ## Example
 
-      iex> Phoenix.React.render_to_static_markup("markdown", %{"content" => "# Hello"})
+      iex> Phoenix.ReactServer.render_to_static_markup("markdown", %{"content" => "# Hello"})
       {:ok, "<h1>Hello</h1>"}
   """
   @spec render_to_static_markup(component(), props()) :: render_result()
   def render_to_static_markup(component, props) do
     server = find_server_pid()
-    timeout = Phoenix.React.Server.config()[:render_timeout]
+    timeout = Phoenix.ReactServer.Server.config()[:render_timeout]
     GenServer.call(server, {:render_to_static_markup, component, props}, timeout)
   rescue
     error ->
@@ -549,7 +549,7 @@ defmodule Phoenix.React do
     children = Supervisor.which_children(__MODULE__)
 
     Enum.find_value(children, fn {_, pid, _, [m | _]} ->
-      if m == Phoenix.React.Server do
+      if m == Phoenix.ReactServer.Server do
         pid
       else
         false

@@ -13,7 +13,7 @@ defmodule ReactDemo.Application do
       {Phoenix.PubSub, name: ReactDemo.PubSub},
       SystemStats,
       FormProcess,
-      Phoenix.React,
+      Phoenix.ReactServer,
       ReactDemoWeb.Endpoint
     ]
 
@@ -24,7 +24,7 @@ defmodule ReactDemo.Application do
   @impl true
   def stop(_state) do
     IO.puts("Shutting down Phoenix app... Cleaning up resources.")
-    Phoenix.React.stop_runtime()
+    Phoenix.ReactServer.stop_runtime()
 
     :ok
   rescue

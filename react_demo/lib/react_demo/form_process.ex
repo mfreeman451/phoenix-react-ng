@@ -3,8 +3,8 @@ defmodule FormProcess do
 
   @init_form_data %{
     "content" => """
-    # Hello, this is Phoenix.React!
-    Phoenix.React is a library that allows you to render React components in your Phoenix application.
+    # Hello, this is Phoenix.ReactServer!
+    Phoenix.ReactServer is a library that allows you to render React components in your Phoenix application.
 
     You can live input and preview the markdown content in this form.
 

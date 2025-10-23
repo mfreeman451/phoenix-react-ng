@@ -1,7 +1,7 @@
-defmodule Phoenix.React.RuntimeTest do
+defmodule Phoenix.ReactServer.RuntimeTest do
   use ExUnit.Case, async: false
 
-  alias Phoenix.React.Runtime
+  alias Phoenix.ReactServer.Runtime
 
   describe "runtime behavior" do
     test "start_link returns a pid" do

@@ -1,6 +1,6 @@
-defmodule Phoenix.React.Runtime.Deno do
+defmodule Phoenix.ReactServer.Runtime.Deno do
   @moduledoc """
-  Deno runtime for Phoenix.React server.
+  Deno runtime for Phoenix.ReactServer server.
 
   This runtime uses Deno as the JavaScript runtime for rendering React components.
   Deno provides secure defaults, TypeScript support, and excellent performance.
@@ -12,7 +12,7 @@ defmodule Phoenix.React.Runtime.Deno do
   ```elixir
   import Config
 
-  config :phoenix_react_server, Phoenix.React.Runtime.Deno,
+  config :phoenix_react_server, Phoenix.ReactServer.Runtime.Deno,
     cd: File.cwd!(),
     cmd: System.find_executable("deno"),
     # In dev mode, the server_js will be watched and recompiled when changed
@@ -65,8 +65,8 @@ defmodule Phoenix.React.Runtime.Deno do
   """
   require Logger
 
-  use Phoenix.React.Runtime
-  import Phoenix.React.Runtime.Common
+  use Phoenix.ReactServer.Runtime
+  import Phoenix.ReactServer.Runtime.Common
 
   @doc """
   Starts the Deno runtime server.
@@ -87,10 +87,10 @@ defmodule Phoenix.React.Runtime.Deno do
 
   @impl true
   @spec init(keyword()) ::
-          {:ok, Phoenix.React.Runtime.t(), {:continue, :start_port}} | {:stop, term()}
+          {:ok, Phoenix.ReactServer.Runtime.t(), {:continue, :start_port}} | {:stop, term()}
   def init(component_base: component_base, render_timeout: render_timeout) do
     {:ok,
-     %Phoenix.React.Runtime{
+     %Phoenix.ReactServer.Runtime{
        component_base: component_base,
        render_timeout: render_timeout,
        server_js: config()[:server_js],
@@ -99,12 +99,12 @@ defmodule Phoenix.React.Runtime.Deno do
   end
 
   @impl true
-  @spec handle_continue(:start_port, Phoenix.React.Runtime.t()) ::
-          {:noreply, Phoenix.React.Runtime.t()}
-  def handle_continue(:start_port, %Phoenix.React.Runtime{component_base: component_base} = state) do
+  @spec handle_continue(:start_port, Phoenix.ReactServer.Runtime.t()) ::
+          {:noreply, Phoenix.ReactServer.Runtime.t()}
+  def handle_continue(:start_port, %Phoenix.ReactServer.Runtime{component_base: component_base} = state) do
     if config()[:env] == :dev do
       start_file_watcher(component_base)
-      Phoenix.React.Runtime.FileWatcher.set_ref(self())
+      Phoenix.ReactServer.Runtime.FileWatcher.set_ref(self())
     end
 
     port = start(component_base: component_base)
@@ -113,16 +113,16 @@ defmodule Phoenix.React.Runtime.Deno do
       "Deno.Server started on port: #{inspect(port)} and OS pid: #{get_port_os_pid(port)}"
     )
 
-    Phoenix.React.Telemetry.record_runtime_startup("Deno", config()[:port])
+    Phoenix.ReactServer.Telemetry.record_runtime_startup("Deno", config()[:port])
 
-    Phoenix.React.Server.set_runtime_process(self())
+    Phoenix.ReactServer.Server.set_runtime_process(self())
 
     {:noreply, %Runtime{state | runtime_port: port}}
   end
 
   @impl true
   def config() do
-    user_config = Application.get_env(:phoenix_react_server, Phoenix.React.Runtime.Deno, [])
+    user_config = Application.get_env(:phoenix_react_server, Phoenix.ReactServer.Runtime.Deno, [])
 
     # Convert user config to map for new config system
     user_config_map =
@@ -139,8 +139,8 @@ defmodule Phoenix.React.Runtime.Deno do
         )
       )
 
-    case Phoenix.React.Config.runtime_config(:deno, user_config_map) do
-      {:ok, config} -> Phoenix.React.Config.to_keyword_list(config)
+    case Phoenix.ReactServer.Config.runtime_config(:deno, user_config_map) do
+      {:ok, config} -> Phoenix.ReactServer.Config.to_keyword_list(config)
       {:error, reason} -> raise ArgumentError, reason
     end
   end
@@ -265,7 +265,7 @@ defmodule Phoenix.React.Runtime.Deno do
     server_port = config()[:port]
     timeout = state.render_timeout
 
-    Phoenix.React.Telemetry.measure(
+    Phoenix.ReactServer.Telemetry.measure(
       "render_#{method}_#{component}",
       [:phoenix, :react, :render],
       fn ->
@@ -273,8 +273,8 @@ defmodule Phoenix.React.Runtime.Deno do
 
         # Record the result for telemetry
         case result do
-          {:ok, _} -> Phoenix.React.Telemetry.record_render(component, method, 0, :ok)
-          {:error, _} -> Phoenix.React.Telemetry.record_render(component, method, 0, :error)
+          {:ok, _} -> Phoenix.ReactServer.Telemetry.record_render(component, method, 0, :ok)
+          {:error, _} -> Phoenix.ReactServer.Telemetry.record_render(component, method, 0, :error)
         end
 
         result
@@ -285,7 +285,7 @@ defmodule Phoenix.React.Runtime.Deno do
   @impl true
   def terminate(reason, state) do
     Logger.debug("Deno.Server terminating")
-    Phoenix.React.Telemetry.record_runtime_shutdown("Deno", reason)
+    Phoenix.ReactServer.Telemetry.record_runtime_shutdown("Deno", reason)
     cleanup_runtime_process(state.runtime_port, reason)
   end
 end

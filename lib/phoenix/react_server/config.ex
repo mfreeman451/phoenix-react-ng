@@ -1,6 +1,6 @@
-defmodule Phoenix.React.Config do
+defmodule Phoenix.ReactServer.Config do
   @moduledoc """
-  Centralized configuration management for Phoenix.React runtimes.
+  Centralized configuration management for Phoenix.ReactServer runtimes.
 
   This module provides default values and validation for all configurable
   parameters across different runtime implementations.

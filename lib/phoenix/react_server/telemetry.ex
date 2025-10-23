@@ -1,6 +1,6 @@
-defmodule Phoenix.React.Telemetry do
+defmodule Phoenix.ReactServer.Telemetry do
   @moduledoc """
-  Comprehensive telemetry and metrics collection for Phoenix.React runtimes.
+  Comprehensive telemetry and metrics collection for Phoenix.ReactServer runtimes.
 
   This module provides production-ready telemetry capabilities including
   performance metrics, health checks, runtime status monitoring, and
@@ -66,7 +66,7 @@ defmodule Phoenix.React.Telemetry do
 
   ```elixir
   # Check runtime health
-  case Phoenix.React.Telemetry.health_check("Bun", 5225) do
+  case Phoenix.ReactServer.Telemetry.health_check("Bun", 5225) do
     {:ok, metadata} -> :healthy
     {:error, reason} -> :unhealthy
   end
@@ -85,9 +85,9 @@ defmodule Phoenix.React.Telemetry do
 
   The module provides structured logging for all operations:
 
-  - Render duration: `[Phoenix.React] Rendered <component> in <duration>ms (method: <method>, result: <result>)`
-  - Runtime events: `[Phoenix.React] Runtime <runtime> started on port <port>`
-  - Cache events: `[Phoenix.React] Cache <hit/miss> for <component>`
+  - Render duration: `[Phoenix.ReactServer] Rendered <component> in <duration>ms (method: <method>, result: <result>)`
+  - Runtime events: `[Phoenix.ReactServer] Runtime <runtime> started on port <port>`
+  - Cache events: `[Phoenix.ReactServer] Cache <hit/miss> for <component>`
 
   """
 
@@ -105,7 +105,7 @@ defmodule Phoenix.React.Telemetry do
 
   ## Examples
 
-      iex> Phoenix.React.Telemetry.record_render("chart", :render_to_string, 45, :ok)
+      iex> Phoenix.ReactServer.Telemetry.record_render("chart", :render_to_string, 45, :ok)
       :ok
   """
   @spec record_render(String.t(), atom(), non_neg_integer(), :ok | :error) :: :ok
@@ -122,7 +122,7 @@ defmodule Phoenix.React.Telemetry do
     result_emoji = if result == :ok, do: "✓", else: "✗"
 
     Logger.info(
-      "[Phoenix.React] #{result_emoji} Rendered '#{component}' in #{duration_ms}ms " <>
+      "[Phoenix.ReactServer] #{result_emoji} Rendered '#{component}' in #{duration_ms}ms " <>
       "(method: #{method}, result: #{result})"
     )
 
@@ -145,7 +145,7 @@ defmodule Phoenix.React.Telemetry do
       timestamp: DateTime.utc_now()
     }
 
-    Logger.info("[Phoenix.React] Runtime #{runtime_name} started on port #{port}")
+    Logger.info("[Phoenix.ReactServer] Runtime #{runtime_name} started on port #{port}")
     :telemetry.execute([:phoenix, :react, :runtime_startup], %{}, metadata)
   end
 
@@ -165,7 +165,7 @@ defmodule Phoenix.React.Telemetry do
       timestamp: DateTime.utc_now()
     }
 
-    Logger.info("[Phoenix.React] Runtime #{runtime_name} shutdown (reason: #{inspect(reason)})")
+    Logger.info("[Phoenix.ReactServer] Runtime #{runtime_name} shutdown (reason: #{inspect(reason)})")
     :telemetry.execute([:phoenix, :react, :runtime_shutdown], %{}, metadata)
   end
 
@@ -205,7 +205,7 @@ defmodule Phoenix.React.Telemetry do
     result_emoji = if result == :ok, do: "✓", else: "✗"
 
     Logger.info(
-      "[Phoenix.React] #{result_emoji} Build completed for #{runtime_name} in #{duration_ms}ms (result: #{result})"
+      "[Phoenix.ReactServer] #{result_emoji} Build completed for #{runtime_name} in #{duration_ms}ms (result: #{result})"
     )
 
     :telemetry.execute([:phoenix, :react, :build], %{duration: duration_ms}, metadata)
@@ -300,7 +300,7 @@ defmodule Phoenix.React.Telemetry do
       timestamp: DateTime.utc_now()
     }
 
-    Logger.debug("[Phoenix.React] Cache hit for '#{component}' (method: #{method})")
+    Logger.debug("[Phoenix.ReactServer] Cache hit for '#{component}' (method: #{method})")
     :telemetry.execute([:phoenix, :react, :cache, :hit], %{}, metadata)
   end
 
@@ -320,7 +320,7 @@ defmodule Phoenix.React.Telemetry do
       timestamp: DateTime.utc_now()
     }
 
-    Logger.debug("[Phoenix.React] Cache miss for '#{component}' (method: #{method})")
+    Logger.debug("[Phoenix.ReactServer] Cache miss for '#{component}' (method: #{method})")
     :telemetry.execute([:phoenix, :react, :cache, :miss], %{}, metadata)
   end
 
@@ -342,7 +342,7 @@ defmodule Phoenix.React.Telemetry do
 
   ## Examples
 
-      iex> Phoenix.React.Telemetry.measure("render_chart", [:phoenix, :react, :render], fn ->
+      iex> Phoenix.ReactServer.Telemetry.measure("render_chart", [:phoenix, :react, :render], fn ->
       ...>   :timer.sleep(10)
       ...>   {:ok, "<div>Chart</div>"}
       ...> end)
@@ -363,7 +363,7 @@ defmodule Phoenix.React.Telemetry do
         timestamp: DateTime.utc_now()
       }
 
-      Logger.debug("[Phoenix.React] Operation '#{operation_name}' completed in #{duration}ms")
+      Logger.debug("[Phoenix.ReactServer] Operation '#{operation_name}' completed in #{duration}ms")
       :telemetry.execute(telemetry_event, %{duration: duration}, metadata)
 
       result
@@ -380,7 +380,7 @@ defmodule Phoenix.React.Telemetry do
         }
 
         Logger.error(
-          "[Phoenix.React] Operation '#{operation_name}' failed after #{duration}ms: #{Exception.message(error)}"
+          "[Phoenix.ReactServer] Operation '#{operation_name}' failed after #{duration}ms: #{Exception.message(error)}"
         )
 
         :telemetry.execute(telemetry_event, %{duration: duration}, metadata)

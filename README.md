@@ -1,4 +1,4 @@
-# Phoenix.React
+# Phoenix.ReactServer
 
 [![CI](https://github.com/gsmlg-dev/phoenix-react/actions/workflows/ci.yml/badge.svg)](https://github.com/gsmlg-dev/phoenix-react/actions/workflows/ci.yml)
 [![Hex.pm](https://img.shields.io/hexpm/v/phoenix_react_server.svg)](https://hex.pm/packages/phoenix_react_server)
@@ -6,7 +6,7 @@
 [![Hex.pm](https://img.shields.io/hexpm/dt/phoenix_react_server.svg)](https://hex.pm/packages/phoenix_react_server)
 [![Hex.pm](https://img.shields.io/hexpm/dw/phoenix_react_server.svg)](https://hex.pm/packages/phoenix_react_server)
 
-Phoenix.React is a powerful library that enables server-side rendering of React components within Phoenix applications. It provides seamless integration between React and Phoenix, supporting multiple rendering methods and runtime environments.
+Phoenix.ReactServer is a powerful library that enables server-side rendering of React components within Phoenix applications. It provides seamless integration between React and Phoenix, supporting multiple rendering methods and runtime environments.
 
 ## ✨ Features
 
@@ -36,14 +36,14 @@ end
 
 ## ⚙️ Configuration
 
-Configure Phoenix.React in your application config:
+Configure Phoenix.ReactServer in your application config:
 
 ```elixir
 import Config
 
-config :phoenix_react_server, Phoenix.React,
-  # React runtime (default: Phoenix.React.Runtime.Bun)
-  runtime: Phoenix.React.Runtime.Bun,
+config :phoenix_react_server, Phoenix.ReactServer,
+  # React runtime (default: Phoenix.ReactServer.Runtime.Bun)
+  runtime: Phoenix.ReactServer.Runtime.Bun,
   # React component base path
   component_base: Path.expand("../assets/component", __DIR__),
   # Render timeout in milliseconds (default: 5_000)
@@ -54,21 +54,21 @@ config :phoenix_react_server, Phoenix.React,
 
 ### Supported Runtimes
 
-- **Bun Runtime** (`Phoenix.React.Runtime.Bun`) - Fast JavaScript runtime with built-in bundler
-- **Deno Runtime** (`Phoenix.React.Runtime.Deno`) - Secure JavaScript runtime with TypeScript support
+- **Bun Runtime** (`Phoenix.ReactServer.Runtime.Bun`) - Fast JavaScript runtime with built-in bundler
+- **Deno Runtime** (`Phoenix.ReactServer.Runtime.Deno`) - Secure JavaScript runtime with TypeScript support
 
 ### Deno Runtime Configuration
 
 To use Deno instead of Bun, configure the runtime and its specific settings:
 
 ```elixir
-config :phoenix_react_server, Phoenix.React,
-  runtime: Phoenix.React.Runtime.Deno,
+config :phoenix_react_server, Phoenix.ReactServer,
+  runtime: Phoenix.ReactServer.Runtime.Deno,
   component_base: Path.expand("../assets/component", __DIR__),
   cache_ttl: 60
 
 # Deno-specific configuration
-config :phoenix_react_server, Phoenix.React.Runtime.Deno,
+config :phoenix_react_server, Phoenix.ReactServer.Runtime.Deno,
   cmd: System.find_executable("deno"),
   server_js: Path.expand("../priv/react/server.js", __DIR__),
   port: 5125,
@@ -87,12 +87,12 @@ You can use environment variables to switch runtimes dynamically:
 ```elixir
 runtime =
   case System.get_env("REACT_RUNTIME", "bun") do
-    "bun" -> Phoenix.React.Runtime.Bun
-    "deno" -> Phoenix.React.Runtime.Deno
-    _ -> Phoenix.React.Runtime.Bun
+    "bun" -> Phoenix.ReactServer.Runtime.Bun
+    "deno" -> Phoenix.ReactServer.Runtime.Deno
+    _ -> Phoenix.ReactServer.Runtime.Bun
   end
 
-config :phoenix_react_server, Phoenix.React, runtime: runtime
+config :phoenix_react_server, Phoenix.ReactServer, runtime: runtime
 ```
 
 ### Application Setup
@@ -106,7 +106,7 @@ def start(_type, _args) do
     {DNSCluster, query: Application.get_env(:react_demo, :dns_cluster_query) || :ignore},
     {Phoenix.PubSub, name: ReactDemo.PubSub},
     # React render service
-    Phoenix.React,
+    Phoenix.ReactServer,
     ReactDemoWeb.Endpoint
   ]
 
@@ -122,7 +122,7 @@ Create a Phoenix component module to wrap your React components:
 ```elixir
 defmodule ReactDemoWeb.ReactComponents do
   use Phoenix.Component
-  import Phoenix.React.Helper
+  import Phoenix.ReactServer.Helper
 
   def react_markdown(assigns) do
     {static, props} = Map.pop(assigns, :static, true)
@@ -289,14 +289,14 @@ Configure the runtime for production in `runtime.exs`:
 
 ```elixir
 # For Bun runtime
-config :phoenix_react_server, Phoenix.React.Runtime.Bun,
+config :phoenix_react_server, Phoenix.ReactServer.Runtime.Bun,
   cmd: System.find_executable("bun"),
   server_js: Path.expand("../priv/react/server.js", __DIR__),
   port: 12666,
   env: :prod
 
 # For Deno runtime
-config :phoenix_react_server, Phoenix.React.Runtime.Deno,
+config :phoenix_react_server, Phoenix.ReactServer.Runtime.Deno,
   cmd: System.find_executable("deno"),
   server_js: Path.expand("../priv/react/server.js", __DIR__),
   port: 12667,
@@ -343,7 +343,7 @@ A complete demo application is available in the `./react_demo` directory, showca
 Configure caching behavior for optimal performance:
 
 ```elixir
-config :phoenix_react_server, Phoenix.React,
+config :phoenix_react_server, Phoenix.ReactServer,
   cache_ttl: 300,  # 5 minutes cache
   gc_time: 60_000  # Cleanup interval in milliseconds
 ```

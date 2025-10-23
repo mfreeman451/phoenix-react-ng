@@ -1,7 +1,7 @@
-defmodule Phoenix.React.HelperTest do
+defmodule Phoenix.ReactServer.HelperTest do
   use ExUnit.Case, async: false
 
-  alias Phoenix.React.Helper
+  alias Phoenix.ReactServer.Helper
 
   setup_all do
     # Ensure the React runtime is available for testing
@@ -168,7 +168,7 @@ defmodule Phoenix.React.HelperTest do
 
   describe "error handling" do
     test "handles binary error messages" do
-      # Mock a scenario where Phoenix.React returns a binary error
+      # Mock a scenario where Phoenix.ReactServer returns a binary error
       # This tests the format_error_html/2 function
       result = Helper.react_component(%{component: "error_component", props: %{}, static: true})
       assert %Phoenix.LiveView.Rendered{} = result

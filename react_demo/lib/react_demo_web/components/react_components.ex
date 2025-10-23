@@ -4,7 +4,7 @@ defmodule ReactDemoWeb.ReactComponents do
 
   """
   use Phoenix.Component
-  import Phoenix.React.Helper
+  import Phoenix.ReactServer.Helper
   use Gettext, backend: ReactDemoWeb.Gettext
 
   require Logger

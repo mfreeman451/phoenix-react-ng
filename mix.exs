@@ -1,4 +1,4 @@
-defmodule Phoenix.React.Mixfile do
+defmodule Phoenix.ReactServer.Mixfile do
   use Mix.Project
 
   @source_url "https://github.com/gsmlg-dev/phoenix-react.git"
@@ -11,9 +11,9 @@ defmodule Phoenix.React.Mixfile do
       elixir: "~> 1.14.1 or ~> 1.15",
       config_path: "config/config.exs",
       deps: deps(),
-      name: "Phoenix.React",
+      name: "Phoenix.ReactServer",
       description: """
-      Phoenix.React is use for renders React component as Phoenix Component in heex template.
+      Phoenix.ReactServer is use for renders React component as Phoenix Component in heex template.
       Support render_to_string and render_to_static_markup and cache render result.
       Only render to string support hyrate react component with phx-hook.
       """,

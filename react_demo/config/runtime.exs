@@ -16,26 +16,26 @@ if config_env() == :prod do
     ]
 end
 
-# Configure Phoenix.React server for OTP releases
+# Configure Phoenix.ReactServer server for OTP releases
 # Use environment variable REACT_RUNTIME to switch between :bun and :deno
 runtime =
   case System.get_env("REACT_RUNTIME", "bun") do
-    "bun" -> Phoenix.React.Runtime.Bun
-    "deno" -> Phoenix.React.Runtime.Deno
-    _ -> Phoenix.React.Runtime.Bun
+    "bun" -> Phoenix.ReactServer.Runtime.Bun
+    "deno" -> Phoenix.ReactServer.Runtime.Deno
+    _ -> Phoenix.ReactServer.Runtime.Bun
   end
 
-config :phoenix_react_server, Phoenix.React, runtime: runtime
+config :phoenix_react_server, Phoenix.ReactServer, runtime: runtime
 
 # Bun configuration for releases
-config :phoenix_react_server, Phoenix.React.Runtime.Bun,
+config :phoenix_react_server, Phoenix.ReactServer.Runtime.Bun,
   cmd: System.find_executable("bun"),
   server_js: Path.expand("../priv/react/bun/server.js", __DIR__),
   port: 5124,
   env: :prod
 
 # Deno configuration for releases
-config :phoenix_react_server, Phoenix.React.Runtime.Deno,
+config :phoenix_react_server, Phoenix.ReactServer.Runtime.Deno,
   cmd: System.find_executable("deno"),
   server_js: Path.expand("../priv/react/server.js", __DIR__),
   port: 5125,

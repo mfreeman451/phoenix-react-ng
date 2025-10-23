@@ -1,7 +1,7 @@
-defmodule Phoenix.ReactTest do
+defmodule Phoenix.ReactServerTest do
   use ExUnit.Case, async: false
 
-  alias Phoenix.React
+  alias Phoenix.ReactServer
 
   setup_all do
     # Wait for server startup
@@ -9,7 +9,7 @@ defmodule Phoenix.ReactTest do
 
     on_exit(fn ->
       try do
-        React.stop_runtime()
+        ReactServer.stop_runtime()
       rescue
         _ -> :ok
       end
@@ -18,34 +18,34 @@ defmodule Phoenix.ReactTest do
 
   describe "render functions" do
     test "render_to_string with existing component" do
-      assert {:ok, html} = React.render_to_string("tab", %{test: true})
+      assert {:ok, html} = ReactServer.render_to_string("tab", %{test: true})
       assert is_binary(html)
     end
 
     test "render_to_static_markup with existing component" do
-      assert {:ok, html} = React.render_to_static_markup("tab", %{test: true})
+      assert {:ok, html} = ReactServer.render_to_static_markup("tab", %{test: true})
       assert is_binary(html)
     end
 
     test "render_to_readable_stream with existing component" do
-      assert {:ok, html} = React.render_to_readable_stream("tab", %{test: true})
+      assert {:ok, html} = ReactServer.render_to_readable_stream("tab", %{test: true})
       assert is_binary(html)
     end
 
     test "render_to_string with non-existent component" do
-      assert {:error, _reason} = React.render_to_string("nonexistent", %{test: true})
+      assert {:error, _reason} = ReactServer.render_to_string("nonexistent", %{test: true})
     end
 
     test "render_to_static_markup with non-existent component" do
-      assert {:error, _reason} = React.render_to_static_markup("nonexistent", %{test: true})
+      assert {:error, _reason} = ReactServer.render_to_static_markup("nonexistent", %{test: true})
     end
 
     test "render_to_readable_stream with non-existent component" do
-      assert {:error, _reason} = React.render_to_readable_stream("nonexistent", %{test: true})
+      assert {:error, _reason} = ReactServer.render_to_readable_stream("nonexistent", %{test: true})
     end
 
     test "render functions with empty props" do
-      assert {:ok, html} = React.render_to_string("tab", %{})
+      assert {:ok, html} = ReactServer.render_to_string("tab", %{})
       assert is_binary(html)
     end
 
@@ -54,7 +54,7 @@ defmodule Phoenix.ReactTest do
       doc =
         "# Test Header\n\nThis is a test markdown document with some **bold** text and *italic* text.\n\n- Item 1\n- Item 2\n- Item 3\n\n```javascript\nconsole.log('Hello World');\n```"
 
-      assert {:ok, html} = React.render_to_static_markup("markdown", %{data: doc})
+      assert {:ok, html} = ReactServer.render_to_static_markup("markdown", %{data: doc})
       assert is_binary(html)
     end
 
@@ -65,14 +65,14 @@ defmodule Phoenix.ReactTest do
         nested: %{inner: "value"}
       }
 
-      assert {:ok, html} = React.render_to_string("tab", props)
+      assert {:ok, html} = ReactServer.render_to_string("tab", props)
       assert is_binary(html)
     end
   end
 
   describe "error handling" do
     test "handles server timeout gracefully" do
-      config = Application.get_env(:phoenix_react_server, Phoenix.React, [])
+      config = Application.get_env(:phoenix_react_server, Phoenix.ReactServer, [])
       original_timeout = config[:render_timeout] || 300_000
       # Note: timeout testing would require mock setup
       assert original_timeout > 0
@@ -81,13 +81,13 @@ defmodule Phoenix.ReactTest do
 
   describe "find_server_pid/0" do
     test "returns a valid pid when server is running" do
-      assert is_pid(React.find_server_pid())
+      assert is_pid(ReactServer.find_server_pid())
     end
   end
 
   describe "configuration" do
     test "default configuration values" do
-      config = Phoenix.React.Server.config()
+      config = Phoenix.ReactServer.Server.config()
       assert Keyword.has_key?(config, :runtime)
       assert Keyword.has_key?(config, :cache_ttl)
       assert Keyword.has_key?(config, :render_timeout)
@@ -101,17 +101,17 @@ defmodule Phoenix.ReactTest do
       method = :render_to_string
 
       # Clear cache first
-      Phoenix.React.Cache.delete_cache(component, props, method)
-      assert nil == Phoenix.React.Cache.get(component, props, method)
+      Phoenix.ReactServer.Cache.delete_cache(component, props, method)
+      assert nil == Phoenix.ReactServer.Cache.get(component, props, method)
 
       # First call should populate cache
-      assert {:ok, html1} = React.render_to_string(component, props)
+      assert {:ok, html1} = ReactServer.render_to_string(component, props)
       assert is_binary(html1)
-      cached_value = Phoenix.React.Cache.get(component, props, method)
+      cached_value = Phoenix.ReactServer.Cache.get(component, props, method)
       assert cached_value == html1
 
       # Second call should use cache
-      assert {:ok, html2} = React.render_to_string(component, props)
+      assert {:ok, html2} = ReactServer.render_to_string(component, props)
       assert html1 == html2
     end
   end

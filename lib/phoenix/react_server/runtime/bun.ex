@@ -1,6 +1,6 @@
-defmodule Phoenix.React.Runtime.Bun do
+defmodule Phoenix.ReactServer.Runtime.Bun do
   @moduledoc """
-  Bun runtime for Phoenix.React server.
+  Bun runtime for Phoenix.ReactServer server.
 
   This runtime uses Bun as the JavaScript runtime for rendering React components.
   Bun provides fast startup times and excellent performance for server-side rendering.
@@ -12,7 +12,7 @@ defmodule Phoenix.React.Runtime.Bun do
   ```elixir
   import Config
 
-  config :phoenix_react_server, Phoenix.React.Runtime.Bun,
+  config :phoenix_react_server, Phoenix.ReactServer.Runtime.Bun,
     cd: File.cwd!(),
     cmd: System.find_executable("bun"),
     # In dev mode, the server_js will be watched and recompiled when changed
@@ -47,8 +47,8 @@ defmodule Phoenix.React.Runtime.Bun do
   """
   require Logger
 
-  use Phoenix.React.Runtime
-  import Phoenix.React.Runtime.Common
+  use Phoenix.ReactServer.Runtime
+  import Phoenix.ReactServer.Runtime.Common
 
   @doc """
   Starts the Bun runtime server.
@@ -69,10 +69,10 @@ defmodule Phoenix.React.Runtime.Bun do
 
   @impl true
   @spec init(keyword()) ::
-          {:ok, Phoenix.React.Runtime.t(), {:continue, :start_port}} | {:stop, term()}
+          {:ok, Phoenix.ReactServer.Runtime.t(), {:continue, :start_port}} | {:stop, term()}
   def init(component_base: component_base, render_timeout: render_timeout) do
     {:ok,
-     %Phoenix.React.Runtime{
+     %Phoenix.ReactServer.Runtime{
        component_base: component_base,
        render_timeout: render_timeout,
        server_js: config()[:server_js],
@@ -81,13 +81,13 @@ defmodule Phoenix.React.Runtime.Bun do
   end
 
   @impl true
-  @spec handle_continue(:start_port, Phoenix.React.Runtime.t()) ::
-          {:noreply, Phoenix.React.Runtime.t()}
-          | {:stop, reason :: term(), Phoenix.React.Runtime.t()}
-  def handle_continue(:start_port, %Phoenix.React.Runtime{component_base: component_base} = state) do
+  @spec handle_continue(:start_port, Phoenix.ReactServer.Runtime.t()) ::
+          {:noreply, Phoenix.ReactServer.Runtime.t()}
+          | {:stop, reason :: term(), Phoenix.ReactServer.Runtime.t()}
+  def handle_continue(:start_port, %Phoenix.ReactServer.Runtime{component_base: component_base} = state) do
     if config()[:env] == :dev do
       start_file_watcher(component_base)
-      Phoenix.React.Runtime.FileWatcher.set_ref(self())
+      Phoenix.ReactServer.Runtime.FileWatcher.set_ref(self())
     end
 
     case start(component_base: component_base) do
@@ -96,9 +96,9 @@ defmodule Phoenix.React.Runtime.Bun do
           "Bun.Server started on port: #{inspect(port)} and OS pid: #{get_port_os_pid(port)}"
         )
 
-        Phoenix.React.Server.set_runtime_process(self())
+        Phoenix.ReactServer.Server.set_runtime_process(self())
 
-        {:noreply, %Phoenix.React.Runtime{state | runtime_port: port}}
+        {:noreply, %Phoenix.ReactServer.Runtime{state | runtime_port: port}}
 
       {:error, reason} ->
         Logger.error("Failed to start Bun server: #{inspect(reason)}")
@@ -109,7 +109,7 @@ defmodule Phoenix.React.Runtime.Bun do
   @impl true
   @spec config() :: keyword()
   def config() do
-    user_config = Application.get_env(:phoenix_react_server, Phoenix.React.Runtime.Bun, [])
+    user_config = Application.get_env(:phoenix_react_server, Phoenix.ReactServer.Runtime.Bun, [])
 
     # Convert user config to map for new config system
     user_config_map =
@@ -126,14 +126,14 @@ defmodule Phoenix.React.Runtime.Bun do
         )
       )
 
-    case Phoenix.React.Config.runtime_config(:bun, user_config_map) do
-      {:ok, config} -> Phoenix.React.Config.to_keyword_list(config)
+    case Phoenix.ReactServer.Config.runtime_config(:bun, user_config_map) do
+      {:ok, config} -> Phoenix.ReactServer.Config.to_keyword_list(config)
       {:error, reason} -> raise ArgumentError, reason
     end
   end
 
   @impl true
-  @spec start(Phoenix.React.Runtime.start_args()) :: port() | {:error, term()}
+  @spec start(Phoenix.ReactServer.Runtime.start_args()) :: port() | {:error, term()}
   def start(component_base: _component_base) do
     config = config()
     cmd = config[:cmd]
@@ -235,11 +235,11 @@ defmodule Phoenix.React.Runtime.Bun do
 
   @impl true
   @spec get_rendered_component(
-          Phoenix.React.Runtime.method(),
+          Phoenix.ReactServer.Runtime.method(),
           String.t(),
           map(),
-          Phoenix.React.Runtime.t()
-        ) :: Phoenix.React.Runtime.render_response()
+          Phoenix.ReactServer.Runtime.t()
+        ) :: Phoenix.ReactServer.Runtime.render_response()
   def get_rendered_component(method, component, props, state)
       when method in [:render_to_readable_stream, :render_to_string, :render_to_static_markup] do
     server_port = config()[:port]
@@ -249,7 +249,7 @@ defmodule Phoenix.React.Runtime.Bun do
   end
 
   @impl true
-  @spec terminate(term(), Phoenix.React.Runtime.t()) :: :ok
+  @spec terminate(term(), Phoenix.ReactServer.Runtime.t()) :: :ok
   def terminate(reason, state) do
     Logger.debug("Bun.Server terminating")
     cleanup_runtime_process(state.runtime_port, reason)

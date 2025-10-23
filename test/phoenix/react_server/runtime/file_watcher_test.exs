@@ -1,7 +1,7 @@
-defmodule Phoenix.React.Runtime.FileWatcherTest do
+defmodule Phoenix.ReactServer.Runtime.FileWatcherTest do
   use ExUnit.Case, async: false
 
-  alias Phoenix.React.Runtime.FileWatcher
+  alias Phoenix.ReactServer.Runtime.FileWatcher
 
   @moduletag :capture_log
 

@@ -1,7 +1,7 @@
-defmodule Phoenix.React.Runtime.CommonTest do
+defmodule Phoenix.ReactServer.Runtime.CommonTest do
   use ExUnit.Case, async: true
 
-  alias Phoenix.React.Runtime.Common
+  alias Phoenix.ReactServer.Runtime.Common
 
   describe "handle_result/1" do
     test "returns {:ok, result} for {:ok, result} tuples" do

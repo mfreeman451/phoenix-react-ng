@@ -1,4 +1,4 @@
-defmodule Phoenix.React.Runtime.Common do
+defmodule Phoenix.ReactServer.Runtime.Common do
   @moduledoc """
   Common functionality shared between different runtime implementations (Bun, Deno, etc.).
 

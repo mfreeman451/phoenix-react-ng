@@ -1,4 +1,4 @@
-defmodule Phoenix.React.Helper do
+defmodule Phoenix.ReactServer.Helper do
   @moduledoc """
   Phoenix.Component helpers for seamless React component integration.
 
@@ -11,7 +11,7 @@ defmodule Phoenix.React.Helper do
   - **Template Integration**: Use React components in Phoenix.Component templates
   - **Multiple Rendering Modes**: Static markup, string rendering, and streaming
   - **Error Handling**: Graceful fallbacks for component rendering failures
-  - **Caching Support**: Leverages Phoenix.React.Cache for performance
+  - **Caching Support**: Leverages Phoenix.ReactServer.Cache for performance
   - **Type Safety**: Full @spec specifications for compile-time checking
 
   ## Usage
@@ -28,7 +28,7 @@ defmodule Phoenix.React.Helper do
       import YourAppWeb.CoreComponents
 
       # React components
-      import Phoenix.React.Helper
+      import Phoenix.ReactServer.Helper
     end
   end
   ```
@@ -162,7 +162,7 @@ defmodule Phoenix.React.Helper do
         nil -> :render_to_readable_stream
       end
 
-    case apply(Phoenix.React, method, [component, props]) do
+    case apply(Phoenix.ReactServer, method, [component, props]) do
       {:ok, html} ->
         create_rendered_component(html, component)
 

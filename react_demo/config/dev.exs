@@ -30,22 +30,22 @@ config :phoenix_live_view,
   debug_heex_annotations: true,
   enable_expensive_runtime_checks: true
 
-# Configure Phoenix.React server for development
+# Configure Phoenix.ReactServer server for development
 # Use environment variable REACT_RUNTIME to switch between :bun and :deno
 runtime =
   case System.get_env("REACT_RUNTIME", "bun") do
-    "bun" -> Phoenix.React.Runtime.Bun
-    "deno" -> Phoenix.React.Runtime.Deno
-    _ -> Phoenix.React.Runtime.Bun
+    "bun" -> Phoenix.ReactServer.Runtime.Bun
+    "deno" -> Phoenix.ReactServer.Runtime.Deno
+    _ -> Phoenix.ReactServer.Runtime.Bun
   end
 
-config :phoenix_react_server, Phoenix.React,
+config :phoenix_react_server, Phoenix.ReactServer,
   runtime: runtime,
   component_base: Path.expand("../assets/component", __DIR__),
   cache_ttl: 10
 
 # Bun configuration
-config :phoenix_react_server, Phoenix.React.Runtime.Bun,
+config :phoenix_react_server, Phoenix.ReactServer.Runtime.Bun,
   cd: Path.expand("..", __DIR__),
   cmd: System.find_executable("bun"),
   server_js: Path.expand("../priv/react/bun/server.js", __DIR__),
@@ -53,7 +53,7 @@ config :phoenix_react_server, Phoenix.React.Runtime.Bun,
   env: :dev
 
 # Deno configuration
-config :phoenix_react_server, Phoenix.React.Runtime.Deno,
+config :phoenix_react_server, Phoenix.ReactServer.Runtime.Deno,
   cd: Path.expand("..", __DIR__),
   cmd: System.find_executable("deno"),
   server_js: Path.expand("../priv/react/server.js", __DIR__),

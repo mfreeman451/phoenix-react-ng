@@ -1,4 +1,4 @@
-defmodule Phoenix.React.Server do
+defmodule Phoenix.ReactServer.Server do
   @moduledoc """
   The React Render Server manages component rendering requests and caching.
 
@@ -18,8 +18,8 @@ defmodule Phoenix.React.Server do
   Configure in your application supervisor:
 
   ```elixir
-  config :phoenix_react_server, Phoenix.React,
-    runtime: Phoenix.React.Runtime.Bun,
+  config :phoenix_react_server, Phoenix.ReactServer,
+    runtime: Phoenix.ReactServer.Runtime.Bun,
     component_base: Path.expand("../assets/component", __DIR__),
     cache_ttl: 60
   ```
@@ -34,8 +34,8 @@ defmodule Phoenix.React.Server do
   """
   require Logger
 
-  alias Phoenix.React.Cache
-  alias Phoenix.React.Runtime
+  alias Phoenix.ReactServer.Cache
+  alias Phoenix.ReactServer.Runtime
 
   use GenServer
 
@@ -78,28 +78,28 @@ defmodule Phoenix.React.Server do
   @doc """
   Returns the React Render Server configuration.
 
-  Retrieves configuration from `Application.get_env(:phoenix_react_server, Phoenix.React)`
+  Retrieves configuration from `Application.get_env(:phoenix_react_server, Phoenix.ReactServer)`
   and applies default values for missing options.
 
   ## Returns
 
   Keyword list containing:
-  - `:runtime` - Runtime module (default: `Phoenix.React.Runtime.Bun`)
+  - `:runtime` - Runtime module (default: `Phoenix.ReactServer.Runtime.Bun`)
   - `:component_base` - Component directory path
   - `:cache_ttl` - Cache TTL in seconds (default: 600)
   - `:render_timeout` - Render timeout in milliseconds (default: 300_000)
 
   ## Example
 
-      iex> Phoenix.React.Server.config()
-      [runtime: Phoenix.React.Runtime.Bun, component_base: "/path/to/components", ...]
+      iex> Phoenix.ReactServer.Server.config()
+      [runtime: Phoenix.ReactServer.Runtime.Bun, component_base: "/path/to/components", ...]
   """
   @spec config() :: server_config()
   def config() do
-    config = Application.get_env(:phoenix_react_server, Phoenix.React, [])
+    config = Application.get_env(:phoenix_react_server, Phoenix.ReactServer, [])
 
     [
-      runtime: config[:runtime] || Phoenix.React.Runtime.Bun,
+      runtime: config[:runtime] || Phoenix.ReactServer.Runtime.Bun,
       component_base: config[:component_base],
       cache_ttl: config[:cache_ttl] || 600,
       render_timeout: config[:render_timeout] || 300_000
@@ -183,11 +183,11 @@ defmodule Phoenix.React.Server do
           case result do
             {:ok, html} = reply ->
               Cache.put(component, props, :render_to_readable_stream, html)
-              Phoenix.React.Telemetry.record_render(component, :render_to_readable_stream, duration, :ok)
+              Phoenix.ReactServer.Telemetry.record_render(component, :render_to_readable_stream, duration, :ok)
               reply
 
             {:error, _} = reply ->
-              Phoenix.React.Telemetry.record_render(component, :render_to_readable_stream, duration, :error)
+              Phoenix.ReactServer.Telemetry.record_render(component, :render_to_readable_stream, duration, :error)
               reply
           end
 
@@ -222,11 +222,11 @@ defmodule Phoenix.React.Server do
           case result do
             {:ok, html} = reply ->
               Cache.put(component, props, :render_to_string, html)
-              Phoenix.React.Telemetry.record_render(component, :render_to_string, duration, :ok)
+              Phoenix.ReactServer.Telemetry.record_render(component, :render_to_string, duration, :ok)
               reply
 
             {:error, _} = reply ->
-              Phoenix.React.Telemetry.record_render(component, :render_to_string, duration, :error)
+              Phoenix.ReactServer.Telemetry.record_render(component, :render_to_string, duration, :error)
               reply
           end
 
@@ -261,11 +261,11 @@ defmodule Phoenix.React.Server do
           case result do
             {:ok, html} = reply ->
               Cache.put(component, props, :render_to_static_markup, html)
-              Phoenix.React.Telemetry.record_render(component, :render_to_static_markup, duration, :ok)
+              Phoenix.ReactServer.Telemetry.record_render(component, :render_to_static_markup, duration, :ok)
               reply
 
             {:error, _} = reply ->
-              Phoenix.React.Telemetry.record_render(component, :render_to_static_markup, duration, :error)
+              Phoenix.ReactServer.Telemetry.record_render(component, :render_to_static_markup, duration, :error)
               reply
           end
 

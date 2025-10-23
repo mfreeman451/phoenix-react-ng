@@ -1,4 +1,4 @@
-defmodule Phoenix.React.Runtime do
+defmodule Phoenix.ReactServer.Runtime do
   @moduledoc """
   Dynamic supervisor for JavaScript runtime processes and file watching.
 
@@ -28,15 +28,15 @@ defmodule Phoenix.React.Runtime do
 
   ## Supported Runtimes
 
-  - **Bun** (`Phoenix.React.Runtime.Bun`): Fast JavaScript runtime
-  - **Deno** (`Phoenix.React.Runtime.Deno`): Secure runtime with npm support
+  - **Bun** (`Phoenix.ReactServer.Runtime.Bun`): Fast JavaScript runtime
+  - **Deno** (`Phoenix.ReactServer.Runtime.Deno`): Secure runtime with npm support
 
   ## Configuration
 
   Runtime behavior is controlled via application configuration:
 
   ```elixir
-  config :phoenix_react_server, Phoenix.React.Runtime.Bun,
+  config :phoenix_react_server, Phoenix.ReactServer.Runtime.Bun,
     env: :dev,  # :dev or :prod
     port: 5225,
     component_base: "/path/to/components"
@@ -67,7 +67,7 @@ defmodule Phoenix.React.Runtime do
   end
 
   def start_file_watcher(args) do
-    spec = {Phoenix.React.Runtime.FileWatcher, args}
+    spec = {Phoenix.ReactServer.Runtime.FileWatcher, args}
     DynamicSupervisor.start_child(__MODULE__, spec)
   end
 
@@ -128,8 +128,8 @@ defmodule Phoenix.React.Runtime do
 
   defmacro __using__(_) do
     quote do
-      @behaviour Phoenix.React.Runtime
-      alias Phoenix.React.Runtime
+      @behaviour Phoenix.ReactServer.Runtime
+      alias Phoenix.ReactServer.Runtime
 
       use GenServer
 

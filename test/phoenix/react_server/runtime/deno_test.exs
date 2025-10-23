@@ -1,7 +1,7 @@
-defmodule Phoenix.React.Runtime.DenoTest do
+defmodule Phoenix.ReactServer.Runtime.DenoTest do
   use ExUnit.Case, async: false
 
-  alias Phoenix.React.Runtime.Deno
+  alias Phoenix.ReactServer.Runtime.Deno
 
   describe "config/0" do
     test "returns default configuration" do
@@ -54,7 +54,7 @@ defmodule Phoenix.React.Runtime.DenoTest do
       component = "test_component"
       props = %{"test" => "value"}
 
-      state = %Phoenix.React.Runtime{
+      state = %Phoenix.ReactServer.Runtime{
         component_base: "/tmp/components",
         render_timeout: 5000,
         server_js: "/tmp/server.js",
