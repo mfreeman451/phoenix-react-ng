@@ -119,11 +119,11 @@ defmodule Phoenix.ReactServer.Cache do
   def get(component, props, method) do
     case lookup(component, props, method) do
       nil ->
-        Telemetry.record_cache_miss(component, method)
+        Phoenix.ReactServer.Telemetry.record_cache_miss(component, method)
         nil
 
       result ->
-        Telemetry.record_cache_hit(component, method)
+        Phoenix.ReactServer.Telemetry.record_cache_hit(component, method)
         result
     end
   end

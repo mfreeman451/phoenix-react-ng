@@ -185,7 +185,7 @@ defmodule Phoenix.ReactServer.Server do
             {:ok, html} = reply ->
               Cache.put(component, props, :render_to_readable_stream, html)
 
-              Telemetry.record_render(
+              Phoenix.ReactServer.Telemetry.record_render(
                 component,
                 :render_to_readable_stream,
                 duration,
@@ -195,7 +195,7 @@ defmodule Phoenix.ReactServer.Server do
               reply
 
             {:error, _} = reply ->
-              Telemetry.record_render(
+              Phoenix.ReactServer.Telemetry.record_render(
                 component,
                 :render_to_readable_stream,
                 duration,
@@ -237,7 +237,7 @@ defmodule Phoenix.ReactServer.Server do
             {:ok, html} = reply ->
               Cache.put(component, props, :render_to_string, html)
 
-              Telemetry.record_render(
+              Phoenix.ReactServer.Telemetry.record_render(
                 component,
                 :render_to_string,
                 duration,
@@ -247,7 +247,7 @@ defmodule Phoenix.ReactServer.Server do
               reply
 
             {:error, _} = reply ->
-              Telemetry.record_render(
+              Phoenix.ReactServer.Telemetry.record_render(
                 component,
                 :render_to_string,
                 duration,
@@ -289,7 +289,7 @@ defmodule Phoenix.ReactServer.Server do
             {:ok, html} = reply ->
               Cache.put(component, props, :render_to_static_markup, html)
 
-              Telemetry.record_render(
+              Phoenix.ReactServer.Telemetry.record_render(
                 component,
                 :render_to_static_markup,
                 duration,
@@ -299,7 +299,7 @@ defmodule Phoenix.ReactServer.Server do
               reply
 
             {:error, _} = reply ->
-              Telemetry.record_render(
+              Phoenix.ReactServer.Telemetry.record_render(
                 component,
                 :render_to_static_markup,
                 duration,
