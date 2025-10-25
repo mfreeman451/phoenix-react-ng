@@ -168,7 +168,7 @@ defmodule Phoenix.ReactServer.Runtime.CommonTest do
       # Test that different timeout values are accepted
       assert :ok = Common.handle_file_change("/test/path", :test_module, [], 1000)
       assert :ok = Common.handle_file_change("/test/path", :test_module, [], 5000)
-      assert :ok = Common.handle_file_change("/test/path", :test_module, [], 10000)
+      assert :ok = Common.handle_file_change("/test/path", :test_module, [], 10_000)
     end
   end
 
@@ -201,14 +201,14 @@ defmodule Phoenix.ReactServer.Runtime.CommonTest do
     test "returns error when port is invalid (too low)" do
       config = [cmd: "/usr/bin/bun", port: 0, env: :dev]
 
-      assert {:error, "Elixir.TestRuntime: :port must be between 1 and 65535"} =
+      assert {:error, "Elixir.TestRuntime: :port must be between 1 and 65_535"} =
                Common.validate_config(config, TestRuntime)
     end
 
     test "returns error when port is invalid (too high)" do
-      config = [cmd: "/usr/bin/bun", port: 65536, env: :dev]
+      config = [cmd: "/usr/bin/bun", port: 65_536, env: :dev]
 
-      assert {:error, "Elixir.TestRuntime: :port must be between 1 and 65535"} =
+      assert {:error, "Elixir.TestRuntime: :port must be between 1 and 65_535"} =
                Common.validate_config(config, TestRuntime)
     end
 
@@ -221,7 +221,7 @@ defmodule Phoenix.ReactServer.Runtime.CommonTest do
 
     test "accepts valid port boundaries" do
       config_low = [cmd: "/usr/bin/bun", port: 1, env: :dev]
-      config_high = [cmd: "/usr/bin/bun", port: 65535, env: :dev]
+      config_high = [cmd: "/usr/bin/bun", port: 65_535, env: :dev]
 
       assert {:ok, ^config_low} = Common.validate_config(config_low, TestRuntime)
       assert {:ok, ^config_high} = Common.validate_config(config_high, TestRuntime)
@@ -243,7 +243,7 @@ defmodule Phoenix.ReactServer.Runtime.CommonTest do
       # Invalid port
       user_config = [port: -1]
 
-      assert {:error, "Elixir.TestRuntime: :port must be between 1 and 65535"} =
+      assert {:error, "Elixir.TestRuntime: :port must be between 1 and 65_535"} =
                Common.merge_config(user_config, defaults, TestRuntime)
     end
 
@@ -281,7 +281,7 @@ defmodule Phoenix.ReactServer.Runtime.CommonTest do
       user_config = [
         port: 8080,
         env: :prod,
-        timeout: 10000,
+        timeout: 10_000,
         custom_option: "custom_value"
       ]
 
@@ -290,7 +290,7 @@ defmodule Phoenix.ReactServer.Runtime.CommonTest do
       assert merged_config[:cmd] == "/usr/bin/bun"
       assert merged_config[:port] == 8080
       assert merged_config[:env] == :prod
-      assert merged_config[:timeout] == 10000
+      assert merged_config[:timeout] == 10_000
       assert merged_config[:custom_option] == "custom_value"
     end
   end

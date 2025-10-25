@@ -1,13 +1,14 @@
 defmodule Phoenix.ReactServer.ServerTest do
   use ExUnit.Case, async: false
 
+  alias Cache
   alias Phoenix.ReactServer.Server
 
   setup do
     # Ensure the cache is clean before each test
-    Phoenix.ReactServer.Cache.delete_cache("test_component", %{}, :static_markup)
-    Phoenix.ReactServer.Cache.delete_cache("test_component", %{}, :string)
-    Phoenix.ReactServer.Cache.delete_cache("test_component", %{}, :readable_stream)
+    Cache.delete_cache("test_component", %{}, :static_markup)
+    Cache.delete_cache("test_component", %{}, :string)
+    Cache.delete_cache("test_component", %{}, :readable_stream)
     :ok
   end
 

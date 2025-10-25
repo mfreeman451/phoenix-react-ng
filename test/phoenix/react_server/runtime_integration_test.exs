@@ -1,9 +1,10 @@
 defmodule Phoenix.ReactServer.RuntimeIntegrationTest do
   use ExUnit.Case, async: false
 
+  alias Phoenix.ReactServer.Config
   alias Phoenix.ReactServer.Runtime.Bun
   alias Phoenix.ReactServer.Runtime.Deno
-  alias Phoenix.ReactServer.Config
+  alias Telemetry
 
   @moduletag :integration
 
@@ -38,7 +39,7 @@ defmodule Phoenix.ReactServer.RuntimeIntegrationTest do
       invalid_config = [
         cmd: "bun",
         # Invalid port
-        port: 70000,
+        port: 70_000,
         env: :dev
       ]
 
@@ -54,7 +55,7 @@ defmodule Phoenix.ReactServer.RuntimeIntegrationTest do
       # Try multiple times to find an available port
       {_test_port, pid} =
         Enum.reduce_while(1..5, nil, fn _attempt, _acc ->
-          test_port = 15225 + :rand.uniform(1000)
+          test_port = 15_225 + :rand.uniform(1000)
 
           Application.put_env(:phoenix_react_server, Bun,
             cmd: System.find_executable("bun"),
@@ -121,7 +122,7 @@ defmodule Phoenix.ReactServer.RuntimeIntegrationTest do
       invalid_config = %{
         cmd: "deno",
         # Invalid port
-        port: 70000,
+        port: 70_000,
         env: :dev,
         # Empty write_dirs
         write_dirs: []
@@ -135,7 +136,7 @@ defmodule Phoenix.ReactServer.RuntimeIntegrationTest do
       # Skip if deno is not available - this is handled by the setup below
 
       # Configure test environment with unique port
-      test_port = 15227 + :rand.uniform(1000)
+      test_port = 15_227 + :rand.uniform(1000)
 
       Application.put_env(:phoenix_react_server, Deno,
         cmd: System.find_executable("deno"),
@@ -170,7 +171,7 @@ defmodule Phoenix.ReactServer.RuntimeIntegrationTest do
       assert security_config.max_component_name_length == 100
       assert is_struct(security_config.allowed_component_name_pattern, Regex)
       assert security_config.max_request_size == 1_048_576
-      assert security_config.request_timeout_ms == 30000
+      assert security_config.request_timeout_ms == 30_000
     end
 
     test "file watcher configuration validation" do
@@ -182,17 +183,19 @@ defmodule Phoenix.ReactServer.RuntimeIntegrationTest do
 
     test "telemetry functionality" do
       # Test telemetry functions don't crash
-      assert :ok = Phoenix.ReactServer.Telemetry.record_render("test", :render_to_string, 100, :ok)
-      assert :ok = Phoenix.ReactServer.Telemetry.record_runtime_startup("test", 5225)
-      assert :ok = Phoenix.ReactServer.Telemetry.record_runtime_shutdown("test", :normal)
-      assert :ok = Phoenix.ReactServer.Telemetry.record_file_change("/test/path", "changed")
-      assert :ok = Phoenix.ReactServer.Telemetry.record_build("test", 1000, :ok)
-      assert :ok = Phoenix.ReactServer.Telemetry.record_cache_hit("test", :render_to_string)
-      assert :ok = Phoenix.ReactServer.Telemetry.record_cache_miss("test", :render_to_string)
+      assert :ok =
+               Telemetry.record_render("test", :render_to_string, 100, :ok)
+
+      assert :ok = Telemetry.record_runtime_startup("test", 5225)
+      assert :ok = Telemetry.record_runtime_shutdown("test", :normal)
+      assert :ok = Telemetry.record_file_change("/test/path", "changed")
+      assert :ok = Telemetry.record_build("test", 1000, :ok)
+      assert :ok = Telemetry.record_cache_hit("test", :render_to_string)
+      assert :ok = Telemetry.record_cache_miss("test", :render_to_string)
 
       # Test measurement function
       result =
-        Phoenix.ReactServer.Telemetry.measure("test_op", [:test], fn ->
+        Telemetry.measure("test_op", [:test], fn ->
           Process.sleep(10)
           :test_result
         end)
@@ -200,7 +203,7 @@ defmodule Phoenix.ReactServer.RuntimeIntegrationTest do
       assert result == :test_result
 
       # Test runtime stats
-      stats = Phoenix.ReactServer.Telemetry.get_runtime_stats("test")
+      stats = Telemetry.get_runtime_stats("test")
       assert is_map(stats)
       assert stats.runtime == "test"
     end
@@ -224,7 +227,7 @@ defmodule Phoenix.ReactServer.RuntimeIntegrationTest do
     end
 
     test "configuration errors are properly formatted" do
-      {:error, error_msg} = Config.runtime_config(:bun, %{port: 70000})
+      {:error, error_msg} = Config.runtime_config(:bun, %{port: 70_000})
       assert is_binary(error_msg)
       assert error_msg =~ "configuration errors"
     end

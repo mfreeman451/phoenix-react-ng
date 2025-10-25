@@ -191,8 +191,8 @@ defmodule Phoenix.ReactServer.Runtime.Common do
       not Keyword.has_key?(config, :port) ->
         {:error, "#{runtime_name}: :port is required in configuration"}
 
-      config[:port] <= 0 or config[:port] > 65535 ->
-        {:error, "#{runtime_name}: :port must be between 1 and 65535"}
+      config[:port] <= 0 or config[:port] > 65_535 ->
+        {:error, "#{runtime_name}: :port must be between 1 and 65_535"}
 
       config[:env] not in [:dev, :prod] ->
         {:error, "#{runtime_name}: :env must be :dev or :prod"}

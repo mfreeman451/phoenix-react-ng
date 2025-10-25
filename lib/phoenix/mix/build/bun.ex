@@ -95,10 +95,10 @@ defmodule Mix.Tasks.Phx.React.Bun.Bundle do
     File.rm!(tmp_file)
   rescue
     error ->
-      IO.inspect(error)
+      Logger.error("Build error: #{inspect(error)}")
   catch
     error ->
-      IO.inspect(error)
+      Logger.error("Build caught error: #{inspect(error)}")
   end
 
   def find_files(dir) do
@@ -108,22 +108,23 @@ defmodule Mix.Tasks.Phx.React.Bun.Bundle do
   defp find_files(dir, acc) do
     case File.ls(dir) do
       {:ok, entries} ->
-        entries
-        |> Enum.reduce(acc, fn entry, acc ->
-          path = Path.join(dir, entry)
-
-          cond do
-            # Recurse into subdirectories
-            File.dir?(path) -> find_files(path, acc)
-            # Collect files
-            File.regular?(path) -> [path | acc]
-            true -> acc
-          end
-        end)
+        Enum.reduce(entries, acc, &process_entry(dir, &1, &2))
 
       # Ignore errors (e.g., permission issues)
       {:error, _} ->
         acc
+    end
+  end
+
+  defp process_entry(dir, entry, acc) do
+    path = Path.join(dir, entry)
+
+    cond do
+      # Recurse into subdirectories
+      File.dir?(path) -> find_files(path, acc)
+      # Collect files
+      File.regular?(path) -> [path | acc]
+      true -> acc
     end
   end
 end

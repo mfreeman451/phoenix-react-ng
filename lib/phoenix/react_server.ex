@@ -45,7 +45,7 @@ defmodule Phoenix.ReactServer do
 
   config :phoenix_react_server, Phoenix.ReactServer,
     # Runtime: Bun (default) or Deno
-    runtime: Phoenix.ReactServer.Runtime.Bun,
+    runtime: Runtime.Bun,
     # React component base path
     component_base: Path.expand("../assets/component", __DIR__),
     # Cache TTL in seconds (default: 60, set to 0 to disable)
@@ -54,8 +54,8 @@ defmodule Phoenix.ReactServer do
 
   ### Supported Runtimes
 
-  - **Bun Runtime** (`Phoenix.ReactServer.Runtime.Bun`): Fast startup, excellent performance
-  - **Deno Runtime** (`Phoenix.ReactServer.Runtime.Deno`): Secure runtime with npm package support
+  - **Bun Runtime** (`Runtime.Bun`): Fast startup, excellent performance
+  - **Deno Runtime** (`Runtime.Deno`): Secure runtime with npm package support
 
   ### Supervisor Configuration
 
@@ -251,7 +251,7 @@ defmodule Phoenix.ReactServer do
 
   **Bun Runtime:**
   ```elixir
-  config :phoenix_react_server, Phoenix.ReactServer.Runtime.Bun,
+  config :phoenix_react_server, Runtime.Bun,
     cmd: System.find_executable("bun"),
     server_js: Path.expand("../priv/react/server.js", __DIR__),
     port: 12666,
@@ -260,7 +260,7 @@ defmodule Phoenix.ReactServer do
 
   **Deno Runtime:**
   ```elixir
-  config :phoenix_react_server, Phoenix.ReactServer.Runtime.Deno,
+  config :phoenix_react_server, Runtime.Deno,
     cmd: System.find_executable("deno"),
     server_js: Path.expand("../priv/react/server.js", __DIR__),
     port: 12667,
@@ -321,6 +321,10 @@ defmodule Phoenix.ReactServer do
 
   use Supervisor
 
+  alias Cache
+  alias Runtime
+  alias Server
+
   @doc """
   Starts the Phoenix.ReactServer supervisor.
 
@@ -348,9 +352,9 @@ defmodule Phoenix.ReactServer do
 
   ## Children
 
-  - `Phoenix.ReactServer.Cache` - ETS-based caching for rendered components
-  - `Phoenix.ReactServer.Runtime` - Dynamic supervisor for JavaScript runtimes
-  - `Phoenix.ReactServer.Server` - GenServer handling rendering requests
+  - `Cache` - ETS-based caching for rendered components
+  - `Runtime` - Dynamic supervisor for JavaScript runtimes
+  - `Server` - GenServer handling rendering requests
 
   ## Returns
 
@@ -376,9 +380,9 @@ defmodule Phoenix.ReactServer do
     end
 
     children = [
-      {Phoenix.ReactServer.Cache, []},
-      {Phoenix.ReactServer.Runtime, []},
-      {Phoenix.ReactServer.Server, []}
+      {Cache, []},
+      {Runtime, []},
+      {Server, []}
     ]
 
     Supervisor.init(children, strategy: :one_for_one)
@@ -464,7 +468,7 @@ defmodule Phoenix.ReactServer do
   @spec render_to_readable_stream(component(), props()) :: render_result()
   def render_to_readable_stream(component, props \\ %{}) do
     server = find_server_pid()
-    timeout = Phoenix.ReactServer.Server.config()[:render_timeout]
+    timeout = Server.config()[:render_timeout]
     GenServer.call(server, {:render_to_readable_stream, component, props}, timeout)
   rescue
     error ->
@@ -495,7 +499,7 @@ defmodule Phoenix.ReactServer do
   @spec render_to_string(component(), props()) :: render_result()
   def render_to_string(component, props \\ %{}) do
     server = find_server_pid()
-    timeout = Phoenix.ReactServer.Server.config()[:render_timeout]
+    timeout = Server.config()[:render_timeout]
     GenServer.call(server, {:render_to_string, component, props}, timeout)
   rescue
     error ->
@@ -527,7 +531,7 @@ defmodule Phoenix.ReactServer do
   @spec render_to_static_markup(component(), props()) :: render_result()
   def render_to_static_markup(component, props) do
     server = find_server_pid()
-    timeout = Phoenix.ReactServer.Server.config()[:render_timeout]
+    timeout = Server.config()[:render_timeout]
     GenServer.call(server, {:render_to_static_markup, component, props}, timeout)
   rescue
     error ->
@@ -545,11 +549,11 @@ defmodule Phoenix.ReactServer do
   Used internally by render functions to locate the server process.
   """
   @spec find_server_pid() :: pid() | nil
-  def find_server_pid() do
+  def find_server_pid do
     children = Supervisor.which_children(__MODULE__)
 
     Enum.find_value(children, fn {_, pid, _, [m | _]} ->
-      if m == Phoenix.ReactServer.Server do
+      if m == Server do
         pid
       else
         false
@@ -569,7 +573,7 @@ defmodule Phoenix.ReactServer do
   - `{:error, reason}` - Failed to stop runtime
   """
   @spec stop_runtime() :: :ok | {:error, term()}
-  def stop_runtime() do
+  def stop_runtime do
     server = find_server_pid()
     GenServer.call(server, :stop_runtime)
   end

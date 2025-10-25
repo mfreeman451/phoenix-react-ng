@@ -40,6 +40,8 @@ defmodule Phoenix.ReactServer.Cache do
   """
   use GenServer
 
+  alias Telemetry
+
   @ets_table_name :react_component_cache
 
   @default_ttl Application.compile_env(:phoenix_react_server, Phoenix.ReactServer, [])
@@ -117,11 +119,11 @@ defmodule Phoenix.ReactServer.Cache do
   def get(component, props, method) do
     case lookup(component, props, method) do
       nil ->
-        Phoenix.ReactServer.Telemetry.record_cache_miss(component, method)
+        Telemetry.record_cache_miss(component, method)
         nil
 
       result ->
-        Phoenix.ReactServer.Telemetry.record_cache_hit(component, method)
+        Telemetry.record_cache_hit(component, method)
         result
     end
   end
@@ -195,7 +197,7 @@ defmodule Phoenix.ReactServer.Cache do
     end
   end
 
-  defp ensure_started() do
+  defp ensure_started do
     case :ets.whereis(@ets_table_name) do
       :undefined -> :ets.new(@ets_table_name, [:set, :public, :named_table])
       ref -> ref

@@ -45,7 +45,7 @@ defmodule Phoenix.ReactServer.Config do
         allowed_component_name_pattern: ~r/^[a-zA-Z0-9_-]+$/,
         # 1MB
         max_request_size: 1_048_576,
-        request_timeout_ms: 30000
+        request_timeout_ms: 30_000
       }
     }
   end
@@ -105,10 +105,10 @@ defmodule Phoenix.ReactServer.Config do
 
   defp validate_port(errors, nil), do: ["port is required" | errors]
 
-  defp validate_port(errors, port) when is_integer(port) and port > 0 and port <= 65535,
+  defp validate_port(errors, port) when is_integer(port) and port > 0 and port <= 65_535,
     do: errors
 
-  defp validate_port(errors, _), do: ["port must be between 1 and 65535" | errors]
+  defp validate_port(errors, _), do: ["port must be between 1 and 65_535" | errors]
 
   defp validate_env(errors, nil), do: ["env is required" | errors]
   defp validate_env(errors, env) when env in [:dev, :prod], do: errors

@@ -2,6 +2,8 @@ defmodule Phoenix.ReactServerTest do
   use ExUnit.Case, async: false
 
   alias Phoenix.ReactServer
+  alias Phoenix.ReactServer.Cache
+  alias Phoenix.ReactServer.Server
 
   setup_all do
     # Wait for server startup
@@ -41,7 +43,8 @@ defmodule Phoenix.ReactServerTest do
     end
 
     test "render_to_readable_stream with non-existent component" do
-      assert {:error, _reason} = ReactServer.render_to_readable_stream("nonexistent", %{test: true})
+      assert {:error, _reason} =
+               ReactServer.render_to_readable_stream("nonexistent", %{test: true})
     end
 
     test "render functions with empty props" do
@@ -87,7 +90,7 @@ defmodule Phoenix.ReactServerTest do
 
   describe "configuration" do
     test "default configuration values" do
-      config = Phoenix.ReactServer.Server.config()
+      config = Server.config()
       assert Keyword.has_key?(config, :runtime)
       assert Keyword.has_key?(config, :cache_ttl)
       assert Keyword.has_key?(config, :render_timeout)
@@ -101,13 +104,13 @@ defmodule Phoenix.ReactServerTest do
       method = :render_to_string
 
       # Clear cache first
-      Phoenix.ReactServer.Cache.delete_cache(component, props, method)
-      assert nil == Phoenix.ReactServer.Cache.get(component, props, method)
+      Cache.delete_cache(component, props, method)
+      assert nil == Cache.get(component, props, method)
 
       # First call should populate cache
       assert {:ok, html1} = ReactServer.render_to_string(component, props)
       assert is_binary(html1)
-      cached_value = Phoenix.ReactServer.Cache.get(component, props, method)
+      cached_value = Cache.get(component, props, method)
       assert cached_value == html1
 
       # Second call should use cache

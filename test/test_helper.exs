@@ -12,7 +12,7 @@ defmodule TestPortAllocator do
 
   def get_test_port do
     # Find an available port in the range 12000-12999
-    case find_available_port(12000, 12999) do
+    case find_available_port(12_000, 12_999) do
       {:ok, port} -> port
       {:error, _reason} -> raise "Could not find available test port"
     end

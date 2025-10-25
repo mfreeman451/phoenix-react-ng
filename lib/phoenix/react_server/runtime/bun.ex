@@ -50,6 +50,12 @@ defmodule Phoenix.ReactServer.Runtime.Bun do
   use Phoenix.ReactServer.Runtime
   import Phoenix.ReactServer.Runtime.Common
 
+  alias Mix.Tasks.Phx.React.Bun.Bundle, as: BunBundle
+  alias Phoenix.ReactServer.Config
+  alias Phoenix.ReactServer.Runtime
+  alias Phoenix.ReactServer.Runtime.FileWatcher
+  alias Phoenix.ReactServer.Server
+
   @doc """
   Starts the Bun runtime server.
 
@@ -84,10 +90,13 @@ defmodule Phoenix.ReactServer.Runtime.Bun do
   @spec handle_continue(:start_port, Phoenix.ReactServer.Runtime.t()) ::
           {:noreply, Phoenix.ReactServer.Runtime.t()}
           | {:stop, reason :: term(), Phoenix.ReactServer.Runtime.t()}
-  def handle_continue(:start_port, %Phoenix.ReactServer.Runtime{component_base: component_base} = state) do
+  def handle_continue(
+        :start_port,
+        %Phoenix.ReactServer.Runtime{component_base: component_base} = state
+      ) do
     if config()[:env] == :dev do
       start_file_watcher(component_base)
-      Phoenix.ReactServer.Runtime.FileWatcher.set_ref(self())
+      FileWatcher.set_ref(self())
     end
 
     case start(component_base: component_base) do
@@ -96,7 +105,7 @@ defmodule Phoenix.ReactServer.Runtime.Bun do
           "Bun.Server started on port: #{inspect(port)} and OS pid: #{get_port_os_pid(port)}"
         )
 
-        Phoenix.ReactServer.Server.set_runtime_process(self())
+        Server.set_runtime_process(self())
 
         {:noreply, %Phoenix.ReactServer.Runtime{state | runtime_port: port}}
 
@@ -108,7 +117,7 @@ defmodule Phoenix.ReactServer.Runtime.Bun do
 
   @impl true
   @spec config() :: keyword()
-  def config() do
+  def config do
     user_config = Application.get_env(:phoenix_react_server, Phoenix.ReactServer.Runtime.Bun, [])
 
     # Convert user config to map for new config system
@@ -126,8 +135,8 @@ defmodule Phoenix.ReactServer.Runtime.Bun do
         )
       )
 
-    case Phoenix.ReactServer.Config.runtime_config(:bun, user_config_map) do
-      {:ok, config} -> Phoenix.ReactServer.Config.to_keyword_list(config)
+    case Config.runtime_config(:bun, user_config_map) do
+      {:ok, config} -> Config.to_keyword_list(config)
       {:error, reason} -> raise ArgumentError, reason
     end
   end
@@ -182,7 +191,7 @@ defmodule Phoenix.ReactServer.Runtime.Bun do
         bundle_args
       end
 
-    Mix.Tasks.Phx.React.Bun.Bundle.run(bundle_args)
+    BunBundle.run(bundle_args)
 
     Logger.debug("Starting file watcher")
     Runtime.start_file_watcher(ref: self(), path: component_base)

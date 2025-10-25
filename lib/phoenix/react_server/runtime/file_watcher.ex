@@ -123,7 +123,7 @@ defmodule Phoenix.ReactServer.Runtime.FileWatcher do
   end
 
   def handle_info({:throttle_update, path}, state) do
-    IO.inspect(state)
+    Logger.debug("FileWatcher state: #{inspect(state)}")
     update_time = Keyword.fetch!(state, :update_time)
     now = System.os_time(:second)
     will_update = now > update_time

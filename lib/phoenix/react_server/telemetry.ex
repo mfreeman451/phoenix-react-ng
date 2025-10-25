@@ -123,7 +123,7 @@ defmodule Phoenix.ReactServer.Telemetry do
 
     Logger.info(
       "[Phoenix.ReactServer] #{result_emoji} Rendered '#{component}' in #{duration_ms}ms " <>
-      "(method: #{method}, result: #{result})"
+        "(method: #{method}, result: #{result})"
     )
 
     :telemetry.execute([:phoenix, :react, :render], %{duration: duration_ms}, metadata)
@@ -165,7 +165,10 @@ defmodule Phoenix.ReactServer.Telemetry do
       timestamp: DateTime.utc_now()
     }
 
-    Logger.info("[Phoenix.ReactServer] Runtime #{runtime_name} shutdown (reason: #{inspect(reason)})")
+    Logger.info(
+      "[Phoenix.ReactServer] Runtime #{runtime_name} shutdown (reason: #{inspect(reason)})"
+    )
+
     :telemetry.execute([:phoenix, :react, :runtime_shutdown], %{}, metadata)
   end
 
@@ -363,7 +366,10 @@ defmodule Phoenix.ReactServer.Telemetry do
         timestamp: DateTime.utc_now()
       }
 
-      Logger.debug("[Phoenix.ReactServer] Operation '#{operation_name}' completed in #{duration}ms")
+      Logger.debug(
+        "[Phoenix.ReactServer] Operation '#{operation_name}' completed in #{duration}ms"
+      )
+
       :telemetry.execute(telemetry_event, %{duration: duration}, metadata)
 
       result

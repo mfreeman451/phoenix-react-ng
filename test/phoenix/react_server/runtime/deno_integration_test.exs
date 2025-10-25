@@ -69,14 +69,14 @@ defmodule Phoenix.ReactServer.Runtime.DenoIntegrationTest do
     test "runtime state structure is valid" do
       state = %Phoenix.ReactServer.Runtime{
         component_base: "/test/components",
-        render_timeout: 30000,
+        render_timeout: 30_000,
         server_js: "/test/server.js",
         cd: "/test",
         runtime_port: nil
       }
 
       assert state.component_base == "/test/components"
-      assert state.render_timeout == 30000
+      assert state.render_timeout == 30_000
       assert state.server_js == "/test/server.js"
       assert state.cd == "/test"
       assert state.runtime_port == nil

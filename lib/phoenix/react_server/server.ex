@@ -36,6 +36,7 @@ defmodule Phoenix.ReactServer.Server do
 
   alias Phoenix.ReactServer.Cache
   alias Phoenix.ReactServer.Runtime
+  alias Telemetry
 
   use GenServer
 
@@ -95,7 +96,7 @@ defmodule Phoenix.ReactServer.Server do
       [runtime: Phoenix.ReactServer.Runtime.Bun, component_base: "/path/to/components", ...]
   """
   @spec config() :: server_config()
-  def config() do
+  def config do
     config = Application.get_env(:phoenix_react_server, Phoenix.ReactServer, [])
 
     [
@@ -183,11 +184,24 @@ defmodule Phoenix.ReactServer.Server do
           case result do
             {:ok, html} = reply ->
               Cache.put(component, props, :render_to_readable_stream, html)
-              Phoenix.ReactServer.Telemetry.record_render(component, :render_to_readable_stream, duration, :ok)
+
+              Telemetry.record_render(
+                component,
+                :render_to_readable_stream,
+                duration,
+                :ok
+              )
+
               reply
 
             {:error, _} = reply ->
-              Phoenix.ReactServer.Telemetry.record_render(component, :render_to_readable_stream, duration, :error)
+              Telemetry.record_render(
+                component,
+                :render_to_readable_stream,
+                duration,
+                :error
+              )
+
               reply
           end
 
@@ -222,11 +236,24 @@ defmodule Phoenix.ReactServer.Server do
           case result do
             {:ok, html} = reply ->
               Cache.put(component, props, :render_to_string, html)
-              Phoenix.ReactServer.Telemetry.record_render(component, :render_to_string, duration, :ok)
+
+              Telemetry.record_render(
+                component,
+                :render_to_string,
+                duration,
+                :ok
+              )
+
               reply
 
             {:error, _} = reply ->
-              Phoenix.ReactServer.Telemetry.record_render(component, :render_to_string, duration, :error)
+              Telemetry.record_render(
+                component,
+                :render_to_string,
+                duration,
+                :error
+              )
+
               reply
           end
 
@@ -261,11 +288,24 @@ defmodule Phoenix.ReactServer.Server do
           case result do
             {:ok, html} = reply ->
               Cache.put(component, props, :render_to_static_markup, html)
-              Phoenix.ReactServer.Telemetry.record_render(component, :render_to_static_markup, duration, :ok)
+
+              Telemetry.record_render(
+                component,
+                :render_to_static_markup,
+                duration,
+                :ok
+              )
+
               reply
 
             {:error, _} = reply ->
-              Phoenix.ReactServer.Telemetry.record_render(component, :render_to_static_markup, duration, :error)
+              Telemetry.record_render(
+                component,
+                :render_to_static_markup,
+                duration,
+                :error
+              )
+
               reply
           end
 
