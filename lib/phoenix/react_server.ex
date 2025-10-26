@@ -468,7 +468,7 @@ defmodule Phoenix.ReactServer do
   @spec render_to_readable_stream(component(), props()) :: render_result()
   def render_to_readable_stream(component, props \\ %{}) do
     server = find_server_pid()
-    timeout = Phoenix.ReactServer.Server.config()[:render_timeout]
+    timeout = Server.config()[:render_timeout]
     GenServer.call(server, {:render_to_readable_stream, component, props}, timeout)
   rescue
     error ->
@@ -499,7 +499,7 @@ defmodule Phoenix.ReactServer do
   @spec render_to_string(component(), props()) :: render_result()
   def render_to_string(component, props \\ %{}) do
     server = find_server_pid()
-    timeout = Phoenix.ReactServer.Server.config()[:render_timeout]
+    timeout = Server.config()[:render_timeout]
     GenServer.call(server, {:render_to_string, component, props}, timeout)
   rescue
     error ->
@@ -531,7 +531,7 @@ defmodule Phoenix.ReactServer do
   @spec render_to_static_markup(component(), props()) :: render_result()
   def render_to_static_markup(component, props) do
     server = find_server_pid()
-    timeout = Phoenix.ReactServer.Server.config()[:render_timeout]
+    timeout = Server.config()[:render_timeout]
     GenServer.call(server, {:render_to_static_markup, component, props}, timeout)
   rescue
     error ->
