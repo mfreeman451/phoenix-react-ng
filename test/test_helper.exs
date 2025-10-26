@@ -27,7 +27,12 @@ exclude =
   end
 
 # Store runtime availability in application env for tests to check
-Application.put_env(:phoenix_react_server, :test_runtime_available, bun_available or deno_available)
+Application.put_env(
+  :phoenix_react_server,
+  :test_runtime_available,
+  bun_available or deno_available
+)
+
 Application.put_env(:phoenix_react_server, :test_bun_available, bun_available)
 Application.put_env(:phoenix_react_server, :test_deno_available, deno_available)
 
