@@ -1,7 +1,7 @@
 defmodule Phoenix.ReactServer.ServerTest do
   use ExUnit.Case, async: false
 
-  alias Cache
+  alias Phoenix.ReactServer.Cache
   alias Phoenix.ReactServer.Server
 
   setup do

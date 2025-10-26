@@ -321,9 +321,9 @@ defmodule Phoenix.ReactServer do
 
   use Supervisor
 
-  alias Cache
-  alias Runtime
-  alias Server
+  alias Phoenix.ReactServer.Cache
+  alias Phoenix.ReactServer.Runtime
+  alias Phoenix.ReactServer.Server
 
   @doc """
   Starts the Phoenix.ReactServer supervisor.

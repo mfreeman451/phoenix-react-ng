@@ -4,7 +4,7 @@ defmodule Phoenix.ReactServer.RuntimeIntegrationTest do
   alias Phoenix.ReactServer.Config
   alias Phoenix.ReactServer.Runtime.Bun
   alias Phoenix.ReactServer.Runtime.Deno
-  alias Telemetry
+  alias Phoenix.ReactServer.Telemetry
 
   @moduletag :integration
 
