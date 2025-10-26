@@ -1,6 +1,8 @@
 defmodule Phoenix.ReactServer.CacheTest do
   use ExUnit.Case, async: true
 
+  @moduletag :unit
+
   alias Phoenix.ReactServer.Cache
 
   setup_all do

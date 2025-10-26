@@ -1,6 +1,8 @@
 defmodule Mix.Tasks.Phx.React.Deno.BundleTest do
   use ExUnit.Case, async: false
 
+  @moduletag :unit
+
   alias Mix.Tasks.Phx.React.Deno.Bundle
 
   describe "run/1" do

@@ -1,6 +1,8 @@
 defmodule Phoenix.ReactServer.RuntimeTest do
   use ExUnit.Case, async: false
 
+  @moduletag :requires_runtime
+
   alias Phoenix.ReactServer.Runtime
 
   describe "runtime behavior" do

@@ -4,6 +4,7 @@ defmodule Phoenix.ReactServer.Runtime.FileWatcherTest do
   alias Phoenix.ReactServer.Runtime.FileWatcher
 
   @moduletag :capture_log
+  @moduletag :integration
 
   setup do
     # Create a temporary directory for testing

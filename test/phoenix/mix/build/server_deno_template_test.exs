@@ -1,6 +1,8 @@
 defmodule Mix.Tasks.Phx.React.Deno.ServerTemplateTest do
   use ExUnit.Case, async: true
 
+  @moduletag :unit
+
   describe "server_deno.js.eex template" do
     test "template compiles correctly with sample files" do
       files = [
@@ -37,7 +39,7 @@ defmodule Mix.Tasks.Phx.React.Deno.ServerTemplateTest do
 
       assert String.contains?(
                result,
-               "import { renderToReadableStream, renderToString, renderToStaticMarkup } from \"npm:react-dom/server\""
+               "import { renderToReadableStream, renderToString, renderToStaticMarkup } from \"npm:react-dom@18/server\""
              )
 
       # Check that environment variables are used

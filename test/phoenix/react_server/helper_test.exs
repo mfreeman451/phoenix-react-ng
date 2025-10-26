@@ -1,6 +1,8 @@
 defmodule Phoenix.ReactServer.HelperTest do
   use ExUnit.Case, async: false
 
+  @moduletag :requires_runtime
+
   alias Phoenix.ReactServer.Helper
 
   setup_all do

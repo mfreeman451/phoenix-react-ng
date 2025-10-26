@@ -1,6 +1,8 @@
 defmodule Mix.Tasks.Phx.React.Deno.BundleIntegrationTest do
   use ExUnit.Case, async: false
 
+  @moduletag :integration
+
   alias Mix.Tasks.Phx.React.Deno.Bundle
 
   describe "bundle integration tests" do

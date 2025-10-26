@@ -1,6 +1,8 @@
 defmodule Phoenix.ReactServer.Runtime.DenoIntegrationTest do
   use ExUnit.Case, async: false
 
+  @moduletag :integration
+
   alias Phoenix.ReactServer.Runtime.Deno
 
   describe "integration tests" do

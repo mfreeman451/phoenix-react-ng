@@ -1,10 +1,35 @@
-# Configure ExUnit to skip Deno tests if Deno is not available
+# Configure ExUnit to skip tests based on available runtimes
+# Check for Bun runtime
+bun_available = System.find_executable("bun") != nil
+
+# Check for Deno runtime
+deno_available = System.find_executable("deno") != nil
+
+# Build exclude list based on available runtimes
 exclude =
-  if System.find_executable("deno") == nil do
-    [:skip_if_no_deno]
-  else
-    []
+  cond do
+    not bun_available and not deno_available ->
+      IO.puts("⚠️  No runtimes found - excluding all integration and runtime tests")
+      IO.puts("⚠️  Bun not found - excluding Bun runtime tests")
+      IO.puts("⚠️  Deno not found - excluding Deno runtime tests")
+      [:requires_bun, :requires_deno, :skip_if_no_deno, :integration, :requires_runtime]
+
+    not bun_available ->
+      IO.puts("⚠️  Bun not found - excluding Bun runtime tests")
+      [:requires_bun]
+
+    not deno_available ->
+      IO.puts("⚠️  Deno not found - excluding Deno runtime tests")
+      [:skip_if_no_deno, :requires_deno]
+
+    true ->
+      []
   end
+
+# Store runtime availability in application env for tests to check
+Application.put_env(:phoenix_react_server, :test_runtime_available, bun_available or deno_available)
+Application.put_env(:phoenix_react_server, :test_bun_available, bun_available)
+Application.put_env(:phoenix_react_server, :test_deno_available, deno_available)
 
 # Dynamic port allocation to prevent conflicts
 defmodule TestPortAllocator do
@@ -51,7 +76,14 @@ Application.put_env(:phoenix_react_server, Phoenix.ReactServer,
 Application.put_env(:phoenix_react_server, Phoenix.ReactServer.Runtime.Bun, port: test_port)
 
 ExUnit.start(exclude: exclude)
-Phoenix.ReactServer.start_link([])
+
+# Only start ReactServer if a runtime is available
+if bun_available or deno_available do
+  Phoenix.ReactServer.start_link([])
+else
+  IO.puts("ℹ️  Skipping ReactServer startup - no runtimes available")
+  IO.puts("ℹ️  Only unit tests will run")
+end
 
 ExUnit.after_suite(fn _results ->
   try do

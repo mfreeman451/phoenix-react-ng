@@ -1,6 +1,8 @@
 defmodule Phoenix.ReactServer.Runtime.DenoTest do
   use ExUnit.Case, async: false
 
+  @moduletag :unit
+
   alias Phoenix.ReactServer.Runtime.Deno
 
   describe "config/0" do

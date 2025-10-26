@@ -1,6 +1,8 @@
 defmodule Phoenix.ReactServer.Runtime.CommonTest do
   use ExUnit.Case, async: true
 
+  @moduletag :unit
+
   alias Phoenix.ReactServer.Runtime.Common
 
   describe "handle_result/1" do
