@@ -104,12 +104,14 @@ defmodule Phoenix.ReactServer.Runtime do
   @type runtime_config :: keyword()
 
   @typedoc "Render response"
-  @type render_response :: {:reply, {:ok, html()}, t()} | {:reply, {:error, term()}, t()}
+  @type render_response :: {:ok, html()} | {:error, term()}
 
   @doc """
   Starts the runtime with given arguments.
+
+  Returns a port that can be used to communicate with the runtime process.
   """
-  @callback start(start_args()) :: {:ok, pid()} | {:error, term()}
+  @callback start(start_args()) :: port()
 
   @doc """
   Starts a file watcher for the component directory.

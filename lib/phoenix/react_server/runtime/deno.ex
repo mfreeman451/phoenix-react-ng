@@ -156,6 +156,7 @@ defmodule Phoenix.ReactServer.Runtime.Deno do
   end
 
   @impl true
+  @spec start(Phoenix.ReactServer.Runtime.start_args()) :: port()
   def start(component_base: _component_base) do
     config = config()
     cmd = config[:cmd]
@@ -293,6 +294,8 @@ defmodule Phoenix.ReactServer.Runtime.Deno do
   end
 
   @impl true
+  @spec terminate(term(), Phoenix.ReactServer.Runtime.t()) ::
+          :normal | :shutdown | {:shutdown, term()}
   def terminate(reason, state) do
     Logger.debug("Deno.Server terminating")
     Telemetry.record_runtime_shutdown("Deno", reason)

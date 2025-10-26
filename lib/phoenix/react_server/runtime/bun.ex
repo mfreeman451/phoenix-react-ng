@@ -142,7 +142,7 @@ defmodule Phoenix.ReactServer.Runtime.Bun do
   end
 
   @impl true
-  @spec start(Phoenix.ReactServer.Runtime.start_args()) :: port() | {:error, term()}
+  @spec start(Phoenix.ReactServer.Runtime.start_args()) :: port()
   def start(component_base: _component_base) do
     config = config()
     cmd = config[:cmd]
@@ -258,7 +258,8 @@ defmodule Phoenix.ReactServer.Runtime.Bun do
   end
 
   @impl true
-  @spec terminate(term(), Phoenix.ReactServer.Runtime.t()) :: :ok
+  @spec terminate(term(), Phoenix.ReactServer.Runtime.t()) ::
+          :normal | :shutdown | {:shutdown, term()}
   def terminate(reason, state) do
     Logger.debug("Bun.Server terminating")
     cleanup_runtime_process(state.runtime_port, reason)
