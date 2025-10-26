@@ -50,7 +50,7 @@ jobs:
           mix deps.get
 
       - name: Install JavaScript dependencies
-        run: bun install react@18 react-dom@18
+        run: bun install react@18 react-dom@18 react-markdown remark-gfm
 
       - name: Run tests
         run: mix test
