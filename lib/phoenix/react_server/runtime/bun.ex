@@ -75,7 +75,7 @@ defmodule Phoenix.ReactServer.Runtime.Bun do
 
   @impl true
   @spec init(keyword()) ::
-          {:ok, Phoenix.ReactServer.Runtime.t(), {:continue, :start_port}} | {:stop, term()}
+          {:ok, Phoenix.ReactServer.Runtime.t(), {:continue, :start_port}}
   def init(component_base: component_base, render_timeout: render_timeout) do
     {:ok,
      %Phoenix.ReactServer.Runtime{
@@ -89,7 +89,6 @@ defmodule Phoenix.ReactServer.Runtime.Bun do
   @impl true
   @spec handle_continue(:start_port, Phoenix.ReactServer.Runtime.t()) ::
           {:noreply, Phoenix.ReactServer.Runtime.t()}
-          | {:stop, reason :: term(), Phoenix.ReactServer.Runtime.t()}
   def handle_continue(
         :start_port,
         %Phoenix.ReactServer.Runtime{component_base: component_base} = state
@@ -99,20 +98,15 @@ defmodule Phoenix.ReactServer.Runtime.Bun do
       FileWatcher.set_ref(self())
     end
 
-    case start(component_base: component_base) do
-      port when is_port(port) ->
-        Logger.debug(
-          "Bun.Server started on port: #{inspect(port)} and OS pid: #{get_port_os_pid(port)}"
-        )
+    port = start(component_base: component_base)
 
-        Server.set_runtime_process(self())
+    Logger.debug(
+      "Bun.Server started on port: #{inspect(port)} and OS pid: #{get_port_os_pid(port)}"
+    )
 
-        {:noreply, %Phoenix.ReactServer.Runtime{state | runtime_port: port}}
+    Server.set_runtime_process(self())
 
-      {:error, reason} ->
-        Logger.error("Failed to start Bun server: #{inspect(reason)}")
-        {:stop, reason, state}
-    end
+    {:noreply, %Phoenix.ReactServer.Runtime{state | runtime_port: port}}
   end
 
   @impl true

@@ -94,7 +94,7 @@ defmodule Phoenix.ReactServer.Runtime.Deno do
 
   @impl true
   @spec init(keyword()) ::
-          {:ok, Phoenix.ReactServer.Runtime.t(), {:continue, :start_port}} | {:stop, term()}
+          {:ok, Phoenix.ReactServer.Runtime.t(), {:continue, :start_port}}
   def init(component_base: component_base, render_timeout: render_timeout) do
     {:ok,
      %Phoenix.ReactServer.Runtime{
