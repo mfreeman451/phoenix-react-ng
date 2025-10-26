@@ -187,7 +187,6 @@ defmodule Phoenix.ReactServer.Cache do
     end
   end
 
-  @spec check_freshness(cache_record()) :: String.t() | nil
   defp check_freshness({[component, props, method], result, expiration}) do
     if expiration > :os.system_time(:seconds) do
       result

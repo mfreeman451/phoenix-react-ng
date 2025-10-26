@@ -11,6 +11,7 @@ defmodule Phoenix.ReactServer.Mixfile do
       elixir: "~> 1.14.1 or ~> 1.15",
       config_path: "config/config.exs",
       deps: deps(),
+      dialyzer: dialyzer(),
       name: "Phoenix.ReactServer",
       description: """
       Phoenix.ReactServer is use for renders React component as Phoenix Component in heex template.
@@ -68,6 +69,13 @@ defmodule Phoenix.ReactServer.Mixfile do
   defp aliases do
     [
       lint: ["credo --strict", "dialyzer"]
+    ]
+  end
+
+  defp dialyzer do
+    [
+      plt_add_apps: [:mix],
+      ignore_warnings: ".dialyzer_ignore.exs"
     ]
   end
 end
