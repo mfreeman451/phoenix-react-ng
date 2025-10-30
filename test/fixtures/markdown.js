@@ -4,21 +4,22 @@ import remarkGfm from 'remark-gfm';
 
 export const Component = (props = {}) => {
   return (
-    <Markdown 
-      className="markdown-body"
-      remarkPlugins={[remarkGfm]}
-      components={{
-        code(props) {
-          const {children, className, node, ...rest} = props
-          return (
-            <code {...rest} className={className || ''}>
-              {children}
-            </code>
-          )
-        }
-      }}
-    >
-      {props.data}
-    </Markdown>
+    <div className="markdown-body">
+      <Markdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          code(props) {
+            const {children, className, node, ...rest} = props
+            return (
+              <code {...rest} className={className || ''}>
+                {children}
+              </code>
+            )
+          }
+        }}
+      >
+        {props.data}
+      </Markdown>
+    </div>
   );
 }
