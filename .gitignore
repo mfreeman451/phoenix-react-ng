@@ -20,3 +20,6 @@ bun.lock
 /*.plt
 /*.plt.hash
 .dialyzer_plt
+
+# Build artifacts
+/server.js
