@@ -4,19 +4,39 @@ defmodule Phoenix.ReactServer.RuntimeIntegrationTest do
   alias Phoenix.ReactServer.Config
   alias Phoenix.ReactServer.Runtime.Bun
   alias Phoenix.ReactServer.Runtime.Deno
+  alias Phoenix.ReactServer.Server
   alias Phoenix.ReactServer.Telemetry
 
   @moduletag :integration
 
   setup do
+    original_runtime_process =
+      case Process.whereis(Server) do
+        pid when is_pid(pid) ->
+          :sys.get_state(Server).runtime_process
+
+        _ ->
+          nil
+      end
+
     # Clean up any existing runtimes before each test
     on_exit(fn ->
+      restore_runtime_process(original_runtime_process)
+
       # Give processes time to clean up
       Process.sleep(100)
     end)
 
     :ok
   end
+
+  defp restore_runtime_process(pid) when is_pid(pid) do
+    if Process.whereis(Server) do
+      :sys.replace_state(Server, fn state -> %{state | runtime_process: pid} end)
+    end
+  end
+
+  defp restore_runtime_process(_), do: :ok
 
   describe "Bun Runtime Integration" do
     @describetag :bun_runtime

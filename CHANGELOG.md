@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.3] - 2026-03-18
+
+### Fixed
+- Restored the shared server runtime pid after temporary Bun/Deno integration tests
+- Eliminated the release-workflow test flake caused by runtime integration tests mutating global server state
+
 ## [0.8.2] - 2026-03-18
 
 ### Changed
