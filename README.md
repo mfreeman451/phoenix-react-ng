@@ -1,10 +1,6 @@
 # Phoenix.ReactServer
 
 [![CI](https://github.com/mfreeman451/phoenix-react/actions/workflows/ci.yml/badge.svg)](https://github.com/mfreeman451/phoenix-react/actions/workflows/ci.yml)
-[![Hex.pm](https://img.shields.io/hexpm/v/phoenix_react_ng.svg)](https://hex.pm/packages/phoenix_react_ng)
-[![Hexdocs.pm](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/phoenix_react_ng/)
-[![Hex.pm](https://img.shields.io/hexpm/dt/phoenix_react_ng.svg)](https://hex.pm/packages/phoenix_react_ng)
-[![Hex.pm](https://img.shields.io/hexpm/dw/phoenix_react_ng.svg)](https://hex.pm/packages/phoenix_react_ng)
 
 Phoenix.ReactServer is a powerful library that enables server-side rendering of React components within Phoenix applications. It provides seamless integration between React and Phoenix, supporting multiple rendering methods and runtime environments.
 
