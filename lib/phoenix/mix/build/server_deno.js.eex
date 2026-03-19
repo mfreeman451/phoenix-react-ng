@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
-import React from "npm:react@18";
-import { renderToReadableStream, renderToString, renderToStaticMarkup } from "npm:react-dom@18/server";
+import React from "npm:react@19.2.4";
+import { renderToReadableStream, renderToString, renderToStaticMarkup } from "npm:react-dom@19.2.4/server";
 
 const __comMap = {};
 <%= for {{name, file}, idx} <- Enum.with_index(files) do %>
