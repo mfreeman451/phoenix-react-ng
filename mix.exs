@@ -1,8 +1,8 @@
 defmodule Phoenix.ReactServer.Mixfile do
   use Mix.Project
 
-  @source_url "https://github.com/mfreeman451/phoenix-react"
-  @version "0.8.1"
+  @source_url "https://github.com/mfreeman451/phoenix-react-ng"
+  @version "0.8.2"
 
   def project do
     [
