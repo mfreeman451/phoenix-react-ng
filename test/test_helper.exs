@@ -28,13 +28,13 @@ exclude =
 
 # Store runtime availability in application env for tests to check
 Application.put_env(
-  :phoenix_react_server,
+  :phoenix_react_ng,
   :test_runtime_available,
   bun_available or deno_available
 )
 
-Application.put_env(:phoenix_react_server, :test_bun_available, bun_available)
-Application.put_env(:phoenix_react_server, :test_deno_available, deno_available)
+Application.put_env(:phoenix_react_ng, :test_bun_available, bun_available)
+Application.put_env(:phoenix_react_ng, :test_deno_available, deno_available)
 
 # Dynamic port allocation to prevent conflicts
 defmodule TestPortAllocator do
@@ -71,14 +71,14 @@ end
 test_port = TestPortAllocator.get_test_port()
 
 # Configure application environment directly for tests
-Application.put_env(:phoenix_react_server, Phoenix.ReactServer,
+Application.put_env(:phoenix_react_ng, Phoenix.ReactServer,
   runtime: Phoenix.ReactServer.Runtime.Bun,
   component_base: Path.expand("../test/fixtures", __DIR__),
   render_timeout: 10_000,
   cache_ttl: 60
 )
 
-Application.put_env(:phoenix_react_server, Phoenix.ReactServer.Runtime.Bun, port: test_port)
+Application.put_env(:phoenix_react_ng, Phoenix.ReactServer.Runtime.Bun, port: test_port)
 
 ExUnit.start(exclude: exclude)
 

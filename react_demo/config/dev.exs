@@ -39,13 +39,13 @@ runtime =
     _ -> Phoenix.ReactServer.Runtime.Bun
   end
 
-config :phoenix_react_server, Phoenix.ReactServer,
+config :phoenix_react_ng, Phoenix.ReactServer,
   runtime: runtime,
   component_base: Path.expand("../assets/component", __DIR__),
   cache_ttl: 10
 
 # Bun configuration
-config :phoenix_react_server, Phoenix.ReactServer.Runtime.Bun,
+config :phoenix_react_ng, Phoenix.ReactServer.Runtime.Bun,
   cd: Path.expand("..", __DIR__),
   cmd: System.find_executable("bun"),
   server_js: Path.expand("../priv/react/bun/server.js", __DIR__),
@@ -53,7 +53,7 @@ config :phoenix_react_server, Phoenix.ReactServer.Runtime.Bun,
   env: :dev
 
 # Deno configuration
-config :phoenix_react_server, Phoenix.ReactServer.Runtime.Deno,
+config :phoenix_react_ng, Phoenix.ReactServer.Runtime.Deno,
   cd: Path.expand("..", __DIR__),
   cmd: System.find_executable("deno"),
   server_js: Path.expand("../priv/react/server.js", __DIR__),

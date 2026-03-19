@@ -1,6 +1,6 @@
 import Config
 
-config :phoenix_react_server, Phoenix.ReactServer,
+config :phoenix_react_ng, Phoenix.ReactServer,
   runtime: Phoenix.ReactServer.Runtime.Bun,
   component_base: Path.expand("../priv/react/component", __DIR__),
   render_timeout: 5_000,

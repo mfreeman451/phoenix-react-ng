@@ -12,12 +12,12 @@ defmodule Phoenix.ReactServer.Runtime.Deno do
   ```elixir
   import Config
 
-  config :phoenix_react_server, Phoenix.ReactServer.Runtime.Deno,
+  config :phoenix_react_ng, Phoenix.ReactServer.Runtime.Deno,
     cd: File.cwd!(),
     cmd: System.find_executable("deno"),
     # In dev mode, the server_js will be watched and recompiled when changed
     # In prod mode, this needs to be precompiled with `mix phx.react.deno.bundle`
-    server_js: Path.expand("deno/server.js", :code.priv_dir(:phoenix_react_server)),
+    server_js: Path.expand("deno/server.js", :code.priv_dir(:phoenix_react_ng)),
     port: 5226,
     env: :dev,
     # Security: restrict write access to specific directories
@@ -130,7 +130,7 @@ defmodule Phoenix.ReactServer.Runtime.Deno do
 
   @impl true
   def config do
-    user_config = Application.get_env(:phoenix_react_server, Phoenix.ReactServer.Runtime.Deno, [])
+    user_config = Application.get_env(:phoenix_react_ng, Phoenix.ReactServer.Runtime.Deno, [])
 
     # Convert user config to map for new config system
     user_config_map =
@@ -143,7 +143,7 @@ defmodule Phoenix.ReactServer.Runtime.Deno do
         Keyword.get(
           user_config,
           :server_js,
-          Path.expand("deno/server.js", :code.priv_dir(:phoenix_react_server))
+          Path.expand("deno/server.js", :code.priv_dir(:phoenix_react_ng))
         )
       )
 

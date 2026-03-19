@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-03-18
+
 ### Added
 - Comprehensive type specifications (`@type` and `@spec`) for all public functions
 - Enhanced module documentation with detailed examples and usage patterns
@@ -17,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Production deployment guides and best practices
 
 ### Changed
+- Forked release published as `phoenix_react_ng`
+- Application configuration namespace changed to `:phoenix_react_ng`
+- Hex publish automation now runs from GitHub Releases
 - Completely rewritten README with comprehensive documentation and examples
 - Improved runtime module architecture with better separation of concerns
 - Enhanced cache module with proper type specifications and documentation
@@ -103,10 +108,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 1. **Update Configuration**
    ```elixir
    # Old configuration
-   config :phoenix_react_server, :runtime, :bun
+   config :phoenix_react_ng, :runtime, :bun
    
    # New configuration
-   config :phoenix_react_server, Phoenix.React,
+   config :phoenix_react_ng, Phoenix.React,
      runtime: Phoenix.React.Runtime.Bun
    ```
 

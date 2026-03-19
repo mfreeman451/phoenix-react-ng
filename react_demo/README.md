@@ -82,4 +82,4 @@ Runtime-specific configurations are in the config files:
   * Docs: https://hexdocs.pm/phoenix
   * Forum: https://elixirforum.com/c/phoenix-forum
   * Source: https://github.com/phoenixframework/phoenix
-  * Phoenix.React: https://hexdocs.pm/phoenix_react_server/
+  * Phoenix.React: https://hexdocs.pm/phoenix_react_ng/
