@@ -39,7 +39,7 @@ defmodule Mix.Tasks.Phx.React.Deno.ServerTemplateTest do
 
       assert String.contains?(
                result,
-               "import { renderToReadableStream, renderToString, renderToStaticMarkup } from \"npm:react-dom@18/server\""
+               "import { renderToReadableStream, renderToString, renderToStaticMarkup } from \"npm:react-dom@19.2.4/server\""
              )
 
       # Check that environment variables are used

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-03-18
+
+### Changed
+- Updated `react` and `react-dom` to `19.2.4`
+- Updated `react-markdown` to `10.1.0`
+- Updated `remark-gfm` to `4.0.1`
+- Updated Deno server template and runtime import pins to match the current React stack
+
 ## [0.8.0] - 2026-03-18
 
 ### Added

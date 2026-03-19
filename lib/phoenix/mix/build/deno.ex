@@ -82,10 +82,10 @@ defmodule Mix.Tasks.Phx.React.Deno.Bundle do
       deno_json_content = ~s({
         "nodeModulesDir": "auto",
         "imports": {
-          "react": "npm:react@18",
-          "react-dom/server": "npm:react-dom@18/server",
-          "react-markdown": "npm:react-markdown@9",
-          "remark-gfm": "npm:remark-gfm@4",
+          "react": "npm:react@19.2.4",
+          "react-dom/server": "npm:react-dom@19.2.4/server",
+          "react-markdown": "npm:react-markdown@10.1.0",
+          "remark-gfm": "npm:remark-gfm@4.0.1",
           "std/": "https://deno.land/std@0.224.0/"
         }
       })
