@@ -18,7 +18,7 @@ defmodule Phoenix.ReactServer.Runtime.DenoTest do
     end
 
     test "uses custom configuration when provided" do
-      Application.put_env(:phoenix_react_server, Deno,
+      Application.put_env(:phoenix_react_ng, Deno,
         cmd: "/custom/deno",
         server_js: "/custom/server.js",
         port: 9999,
@@ -32,7 +32,7 @@ defmodule Phoenix.ReactServer.Runtime.DenoTest do
         assert config[:port] == 9999
         assert config[:env] == :prod
       after
-        Application.delete_env(:phoenix_react_server, Deno)
+        Application.delete_env(:phoenix_react_ng, Deno)
       end
     end
   end

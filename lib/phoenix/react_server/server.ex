@@ -18,7 +18,7 @@ defmodule Phoenix.ReactServer.Server do
   Configure in your application supervisor:
 
   ```elixir
-  config :phoenix_react_server, Phoenix.ReactServer,
+  config :phoenix_react_ng, Phoenix.ReactServer,
     runtime: Phoenix.ReactServer.Runtime.Bun,
     component_base: Path.expand("../assets/component", __DIR__),
     cache_ttl: 60
@@ -79,7 +79,7 @@ defmodule Phoenix.ReactServer.Server do
   @doc """
   Returns the React Render Server configuration.
 
-  Retrieves configuration from `Application.get_env(:phoenix_react_server, Phoenix.ReactServer)`
+  Retrieves configuration from `Application.get_env(:phoenix_react_ng, Phoenix.ReactServer)`
   and applies default values for missing options.
 
   ## Returns
@@ -97,7 +97,7 @@ defmodule Phoenix.ReactServer.Server do
   """
   @spec config() :: server_config()
   def config do
-    config = Application.get_env(:phoenix_react_server, Phoenix.ReactServer, [])
+    config = Application.get_env(:phoenix_react_ng, Phoenix.ReactServer, [])
 
     [
       runtime: config[:runtime] || Phoenix.ReactServer.Runtime.Bun,

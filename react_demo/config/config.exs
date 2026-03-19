@@ -60,7 +60,7 @@ runtime =
     _ -> Phoenix.ReactServer.Runtime.Bun
   end
 
-config :phoenix_react_server, Phoenix.ReactServer,
+config :phoenix_react_ng, Phoenix.ReactServer,
   runtime: runtime,
   component_base: Path.expand("../assets/component", __DIR__),
   cache_ttl: 60

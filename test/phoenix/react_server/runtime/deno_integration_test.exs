@@ -36,7 +36,7 @@ defmodule Phoenix.ReactServer.Runtime.DenoIntegrationTest do
         cd: "/test/cd"
       ]
 
-      Application.put_env(:phoenix_react_server, Deno, custom_config)
+      Application.put_env(:phoenix_react_ng, Deno, custom_config)
 
       try do
         config = Deno.config()
@@ -46,7 +46,7 @@ defmodule Phoenix.ReactServer.Runtime.DenoIntegrationTest do
         assert config[:env] == :prod
         assert config[:cd] == "/test/cd"
       after
-        Application.delete_env(:phoenix_react_server, Deno)
+        Application.delete_env(:phoenix_react_ng, Deno)
       end
     end
 

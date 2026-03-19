@@ -18,14 +18,14 @@ defmodule Phoenix.ReactServer do
   - [x] Client-side hydration capabilities
   - [x] Bundle size optimization (67% smaller than previous versions)
 
-  See the [docs](https://hexdocs.pm/phoenix_react_server/) for more information.
+  See the [docs](https://hexdocs.pm/phoenix_react_ng/) for more information.
 
   ## Install this package
 
   Add deps in `mix.exs`
 
   ```elixir
-  {:phoenix_react_server, "~> 0.5"},
+  {:phoenix_react_ng, "~> 0.5"},
   ```
 
   ## Installation
@@ -33,7 +33,7 @@ defmodule Phoenix.ReactServer do
   Add to your dependencies in `mix.exs`:
 
   ```elixir
-  {:phoenix_react_server, "~> 0.5"},
+  {:phoenix_react_ng, "~> 0.5"},
   ```
 
   ## Configuration
@@ -43,7 +43,7 @@ defmodule Phoenix.ReactServer do
   ```elixir
   import Config
 
-  config :phoenix_react_server, Phoenix.ReactServer,
+  config :phoenix_react_ng, Phoenix.ReactServer,
     # Runtime: Bun (default) or Deno
     runtime: Runtime.Bun,
     # React component base path
@@ -251,7 +251,7 @@ defmodule Phoenix.ReactServer do
 
   **Bun Runtime:**
   ```elixir
-  config :phoenix_react_server, Runtime.Bun,
+  config :phoenix_react_ng, Runtime.Bun,
     cmd: System.find_executable("bun"),
     server_js: Path.expand("../priv/react/server.js", __DIR__),
     port: 12666,
@@ -260,7 +260,7 @@ defmodule Phoenix.ReactServer do
 
   **Deno Runtime:**
   ```elixir
-  config :phoenix_react_server, Runtime.Deno,
+  config :phoenix_react_ng, Runtime.Deno,
     cmd: System.find_executable("deno"),
     server_js: Path.expand("../priv/react/server.js", __DIR__),
     port: 12667,

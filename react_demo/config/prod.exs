@@ -23,17 +23,17 @@ runtime =
     _ -> Phoenix.ReactServer.Runtime.Bun
   end
 
-config :phoenix_react_server, Phoenix.ReactServer, runtime: runtime
+config :phoenix_react_ng, Phoenix.ReactServer, runtime: runtime
 
 # Bun configuration for production
-config :phoenix_react_server, Phoenix.ReactServer.Runtime.Bun,
+config :phoenix_react_ng, Phoenix.ReactServer.Runtime.Bun,
   cmd: System.find_executable("bun"),
   server_js: Path.expand("../priv/react/bun/server.js", __DIR__),
   port: 5124,
   env: :prod
 
 # Deno configuration for production
-config :phoenix_react_server, Phoenix.ReactServer.Runtime.Deno,
+config :phoenix_react_ng, Phoenix.ReactServer.Runtime.Deno,
   cmd: System.find_executable("deno"),
   server_js: Path.expand("../priv/react/server.js", __DIR__),
   port: 5125,

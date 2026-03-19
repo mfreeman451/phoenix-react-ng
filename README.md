@@ -1,10 +1,10 @@
 # Phoenix.ReactServer
 
-[![CI](https://github.com/gsmlg-dev/phoenix-react/actions/workflows/ci.yml/badge.svg)](https://github.com/gsmlg-dev/phoenix-react/actions/workflows/ci.yml)
-[![Hex.pm](https://img.shields.io/hexpm/v/phoenix_react_server.svg)](https://hex.pm/packages/phoenix_react_server)
-[![Hexdocs.pm](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/phoenix_react_server/)
-[![Hex.pm](https://img.shields.io/hexpm/dt/phoenix_react_server.svg)](https://hex.pm/packages/phoenix_react_server)
-[![Hex.pm](https://img.shields.io/hexpm/dw/phoenix_react_server.svg)](https://hex.pm/packages/phoenix_react_server)
+[![CI](https://github.com/mfreeman451/phoenix-react/actions/workflows/ci.yml/badge.svg)](https://github.com/mfreeman451/phoenix-react/actions/workflows/ci.yml)
+[![Hex.pm](https://img.shields.io/hexpm/v/phoenix_react_ng.svg)](https://hex.pm/packages/phoenix_react_ng)
+[![Hexdocs.pm](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/phoenix_react_ng/)
+[![Hex.pm](https://img.shields.io/hexpm/dt/phoenix_react_ng.svg)](https://hex.pm/packages/phoenix_react_ng)
+[![Hex.pm](https://img.shields.io/hexpm/dw/phoenix_react_ng.svg)](https://hex.pm/packages/phoenix_react_ng)
 
 Phoenix.ReactServer is a powerful library that enables server-side rendering of React components within Phoenix applications. It provides seamless integration between React and Phoenix, supporting multiple rendering methods and runtime environments.
 
@@ -20,16 +20,16 @@ Phoenix.ReactServer is a powerful library that enables server-side rendering of 
 
 ## 📚 Documentation
 
-See the [complete documentation](https://hexdocs.pm/phoenix_react_server/) for detailed API reference and examples.
+See the [complete documentation](https://hexdocs.pm/phoenix_react_ng/) for detailed API reference and examples.
 
 ## 🚀 Installation
 
-Add `phoenix_react_server` to your dependencies in `mix.exs`:
+Add `phoenix_react_ng` to your dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:phoenix_react_server, "~> 0.7"}
+    {:phoenix_react_ng, "~> 0.8"}
   ]
 end
 ```
@@ -41,7 +41,7 @@ Configure Phoenix.ReactServer in your application config:
 ```elixir
 import Config
 
-config :phoenix_react_server, Phoenix.ReactServer,
+config :phoenix_react_ng, Phoenix.ReactServer,
   # React runtime (default: Phoenix.ReactServer.Runtime.Bun)
   runtime: Phoenix.ReactServer.Runtime.Bun,
   # React component base path
@@ -62,13 +62,13 @@ config :phoenix_react_server, Phoenix.ReactServer,
 To use Deno instead of Bun, configure the runtime and its specific settings:
 
 ```elixir
-config :phoenix_react_server, Phoenix.ReactServer,
+config :phoenix_react_ng, Phoenix.ReactServer,
   runtime: Phoenix.ReactServer.Runtime.Deno,
   component_base: Path.expand("../assets/component", __DIR__),
   cache_ttl: 60
 
 # Deno-specific configuration
-config :phoenix_react_server, Phoenix.ReactServer.Runtime.Deno,
+config :phoenix_react_ng, Phoenix.ReactServer.Runtime.Deno,
   cmd: System.find_executable("deno"),
   server_js: Path.expand("../priv/react/server.js", __DIR__),
   port: 5125,
@@ -92,7 +92,7 @@ runtime =
     _ -> Phoenix.ReactServer.Runtime.Bun
   end
 
-config :phoenix_react_server, Phoenix.ReactServer, runtime: runtime
+config :phoenix_react_ng, Phoenix.ReactServer, runtime: runtime
 ```
 
 ### Application Setup
@@ -289,14 +289,14 @@ Configure the runtime for production in `runtime.exs`:
 
 ```elixir
 # For Bun runtime
-config :phoenix_react_server, Phoenix.ReactServer.Runtime.Bun,
+config :phoenix_react_ng, Phoenix.ReactServer.Runtime.Bun,
   cmd: System.find_executable("bun"),
   server_js: Path.expand("../priv/react/server.js", __DIR__),
   port: 12666,
   env: :prod
 
 # For Deno runtime
-config :phoenix_react_server, Phoenix.ReactServer.Runtime.Deno,
+config :phoenix_react_ng, Phoenix.ReactServer.Runtime.Deno,
   cmd: System.find_executable("deno"),
   server_js: Path.expand("../priv/react/server.js", __DIR__),
   port: 12667,
@@ -343,7 +343,7 @@ A complete demo application is available in the `./react_demo` directory, showca
 Configure caching behavior for optimal performance:
 
 ```elixir
-config :phoenix_react_server, Phoenix.ReactServer,
+config :phoenix_react_ng, Phoenix.ReactServer,
   cache_ttl: 300,  # 5 minutes cache
   gc_time: 60_000  # Cleanup interval in milliseconds
 ```
@@ -353,7 +353,7 @@ config :phoenix_react_server, Phoenix.ReactServer,
 Configure security limits for component rendering:
 
 ```elixir
-config :phoenix_react_server, Phoenix.React.Config,
+config :phoenix_react_ng, Phoenix.React.Config,
   security: %{
     max_component_name_length: 100,
     max_request_size: 1_048_576,  # 1MB
@@ -366,7 +366,7 @@ config :phoenix_react_server, Phoenix.React.Config,
 Configure development file watching:
 
 ```elixir
-config :phoenix_react_server, Phoenix.React.Config,
+config :phoenix_react_ng, Phoenix.React.Config,
   file_watcher: %{
     throttle_ms: 3000,
     debounce_ms: 100
@@ -380,4 +380,3 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-

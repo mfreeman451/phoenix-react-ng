@@ -1,18 +1,18 @@
 defmodule Phoenix.ReactServer.Mixfile do
   use Mix.Project
 
-  @source_url "https://github.com/gsmlg-dev/phoenix-react.git"
-  @version "0.7.3"
+  @source_url "https://github.com/mfreeman451/phoenix-react"
+  @version "0.8.0"
 
   def project do
     [
-      app: :phoenix_react_server,
+      app: :phoenix_react_ng,
       version: @version,
       elixir: "~> 1.14.1 or ~> 1.15",
       config_path: "config/config.exs",
       deps: deps(),
       dialyzer: dialyzer(),
-      name: "Phoenix.ReactServer",
+      name: "Phoenix.ReactServer NG",
       description: """
       Phoenix.ReactServer is use for renders React component as Phoenix Component in heex template.
       Support render_to_string and render_to_static_markup and cache render result.
@@ -56,11 +56,11 @@ defmodule Phoenix.ReactServer.Mixfile do
 
   defp package do
     [
-      maintainers: ["Jonathan Gao"],
+      maintainers: ["Matt Freeman"],
       licenses: ["MIT"],
       files: ~w(lib CHANGELOG.md LICENSE mix.exs README.md),
       links: %{
-        Changelog: "https://hexdocs.pm/phoenix_react_server/changelog.html",
+        Changelog: "https://hexdocs.pm/phoenix_react_ng/changelog.html",
         GitHub: @source_url
       }
     ]

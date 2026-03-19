@@ -77,7 +77,7 @@ defmodule Phoenix.ReactServerTest do
 
   describe "error handling" do
     test "handles server timeout gracefully" do
-      config = Application.get_env(:phoenix_react_server, Phoenix.ReactServer, [])
+      config = Application.get_env(:phoenix_react_ng, Phoenix.ReactServer, [])
       original_timeout = config[:render_timeout] || 300_000
       # Note: timeout testing would require mock setup
       assert original_timeout > 0

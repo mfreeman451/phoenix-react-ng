@@ -24,7 +24,7 @@ defmodule Phoenix.ReactServer.Cache do
   ## Configuration
 
   ```elixir
-  config :phoenix_react_server, Phoenix.ReactServer,
+  config :phoenix_react_ng, Phoenix.ReactServer,
     cache_ttl: 3600  # Cache TTL in seconds (default: 1 hour)
   ```
 
@@ -44,7 +44,7 @@ defmodule Phoenix.ReactServer.Cache do
 
   @ets_table_name :react_component_cache
 
-  @default_ttl Application.compile_env(:phoenix_react_server, Phoenix.ReactServer, [])
+  @default_ttl Application.compile_env(:phoenix_react_ng, Phoenix.ReactServer, [])
                |> Keyword.get(:cache_ttl, 3600)
 
   def start_link(_) do
@@ -78,7 +78,7 @@ defmodule Phoenix.ReactServer.Cache do
   defp schedule_work do
     # Every 60 seconds by default
     gc_time =
-      Application.get_env(:phoenix_react_server, Phoenix.ReactServer)
+      Application.get_env(:phoenix_react_ng, Phoenix.ReactServer)
       |> Keyword.get(:gc_time, 60_000)
 
     Process.send_after(self(), :gc, gc_time)

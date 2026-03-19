@@ -65,7 +65,7 @@ defmodule Phoenix.ReactServer.RuntimeIntegrationTest do
           Enum.reduce_while(1..5, nil, fn _attempt, _acc ->
             test_port = 15_225 + :rand.uniform(1000)
 
-            Application.put_env(:phoenix_react_server, Bun,
+            Application.put_env(:phoenix_react_ng, Bun,
               cmd: System.find_executable("bun"),
               port: test_port,
               env: :dev,
@@ -155,7 +155,7 @@ defmodule Phoenix.ReactServer.RuntimeIntegrationTest do
         # Configure test environment with unique port
         test_port = 15_227 + :rand.uniform(1000)
 
-        Application.put_env(:phoenix_react_server, Deno,
+        Application.put_env(:phoenix_react_ng, Deno,
           cmd: System.find_executable("deno"),
           port: test_port,
           env: :dev,

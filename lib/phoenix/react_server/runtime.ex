@@ -36,7 +36,7 @@ defmodule Phoenix.ReactServer.Runtime do
   Runtime behavior is controlled via application configuration:
 
   ```elixir
-  config :phoenix_react_server, Phoenix.ReactServer.Runtime.Bun,
+  config :phoenix_react_ng, Phoenix.ReactServer.Runtime.Bun,
     env: :dev,  # :dev or :prod
     port: 5225,
     component_base: "/path/to/components"

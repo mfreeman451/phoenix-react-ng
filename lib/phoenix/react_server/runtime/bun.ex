@@ -12,12 +12,12 @@ defmodule Phoenix.ReactServer.Runtime.Bun do
   ```elixir
   import Config
 
-  config :phoenix_react_server, Phoenix.ReactServer.Runtime.Bun,
+  config :phoenix_react_ng, Phoenix.ReactServer.Runtime.Bun,
     cd: File.cwd!(),
     cmd: System.find_executable("bun"),
     # In dev mode, the server_js will be watched and recompiled when changed
     # In prod mode, this needs to be precompiled with `mix phx.react.bun.bundle`
-    server_js: Path.expand("bun/server.js", :code.priv_dir(:phoenix_react_server)),
+    server_js: Path.expand("bun/server.js", :code.priv_dir(:phoenix_react_ng)),
     port: 5225,
     env: :dev
   ```
@@ -110,7 +110,7 @@ defmodule Phoenix.ReactServer.Runtime.Bun do
   @impl true
   @spec config() :: keyword()
   def config do
-    user_config = Application.get_env(:phoenix_react_server, Phoenix.ReactServer.Runtime.Bun, [])
+    user_config = Application.get_env(:phoenix_react_ng, Phoenix.ReactServer.Runtime.Bun, [])
 
     # Convert user config to map for new config system
     user_config_map =
@@ -123,7 +123,7 @@ defmodule Phoenix.ReactServer.Runtime.Bun do
         Keyword.get(
           user_config,
           :server_js,
-          Path.expand("bun/server.js", :code.priv_dir(:phoenix_react_server))
+          Path.expand("bun/server.js", :code.priv_dir(:phoenix_react_ng))
         )
       )
 
