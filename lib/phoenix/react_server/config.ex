@@ -121,7 +121,7 @@ defmodule Phoenix.ReactServer.Config do
   defp validate_write_dirs(errors, nil, :deno),
     do: ["write_dirs is required for Deno runtime" | errors]
 
-  defp validate_write_dirs(errors, dirs, :deno) when is_list(dirs) and length(dirs) > 0,
+  defp validate_write_dirs(errors, [_ | _], :deno),
     do: errors
 
   defp validate_write_dirs(errors, _, :deno),
