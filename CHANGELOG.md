@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.4] - 2026-05-02
+
+### Changed
+- Updated `react` and `react-dom` to `19.2.5`
+- Updated Deno lockfiles and bundler imports for the React `19.2.5` runtime stack
+- Aligned the test workflow with the release workflow by using Deno 2.x and manifest-based JavaScript installs
+
+### Fixed
+- Removed a strict Credo warning from Deno write directory validation
+
 ## [0.8.3] - 2026-03-18
 
 ### Fixed
