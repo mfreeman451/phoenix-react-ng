@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.5] - 2026-05-02
+
+### Fixed
+- Updated Deno source-mode React imports and generated `server_source.js` to use React `19.2.5`
+- Centralized Deno React import specifiers in the Mix bundle task so source and compiled Deno outputs stay aligned
+
 ## [0.8.4] - 2026-05-02
 
 ### Changed
