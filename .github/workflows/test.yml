@@ -21,14 +21,14 @@ jobs:
           otp-version: '28'
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
       - name: Setup Deno
-        uses: denoland/setup-deno@v1
+        uses: denoland/setup-deno@v2
         with:
-          deno-version: v1.x
+          deno-version: v2.x
 
       - name: Install system dependencies
         run: sudo apt-get update && sudo apt-get install -y inotify-tools
@@ -49,8 +49,12 @@ jobs:
           mix local.rebar --force
           mix deps.get
 
-      - name: Install JavaScript dependencies
-        run: bun install react@19 react-dom@19 react-markdown remark-gfm
+      - name: Install root JavaScript dependencies
+        run: bun install
+
+      - name: Install test JavaScript dependencies
+        working-directory: test
+        run: bun install
 
       - name: Run tests
         run: mix test
