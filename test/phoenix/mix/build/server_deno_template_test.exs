@@ -17,7 +17,14 @@ defmodule Mix.Tasks.Phx.React.Deno.ServerTemplateTest do
       quoted = EEx.compile_file(template_path)
 
       # Evaluate the template
-      {result, _bindings} = Code.eval_quoted(quoted, files: files, base_dir: base_dir)
+      {result, _bindings} =
+        Code.eval_quoted(
+          quoted,
+          files: files,
+          base_dir: base_dir,
+          react_import: "npm:react@19.2.5",
+          react_dom_server_import: "npm:react-dom@19.2.5/server"
+        )
 
       # Check that the result contains expected imports
       assert String.contains?(
@@ -39,7 +46,7 @@ defmodule Mix.Tasks.Phx.React.Deno.ServerTemplateTest do
 
       assert String.contains?(
                result,
-               "import { renderToReadableStream, renderToString, renderToStaticMarkup } from \"npm:react-dom@19.2.4/server\""
+               "import { renderToReadableStream, renderToString, renderToStaticMarkup } from \"npm:react-dom@19.2.5/server\""
              )
 
       # Check that environment variables are used
@@ -58,7 +65,14 @@ defmodule Mix.Tasks.Phx.React.Deno.ServerTemplateTest do
       template_path = Path.expand("../../../../lib/phoenix/mix/build/server_deno.js.eex", __DIR__)
       quoted = EEx.compile_file(template_path)
 
-      {result, _bindings} = Code.eval_quoted(quoted, files: files, base_dir: base_dir)
+      {result, _bindings} =
+        Code.eval_quoted(
+          quoted,
+          files: files,
+          base_dir: base_dir,
+          react_import: "npm:react@19.2.5",
+          react_dom_server_import: "npm:react-dom@19.2.5/server"
+        )
 
       # Should still contain the basic structure
       assert String.contains?(result, "const __comMap = {};")

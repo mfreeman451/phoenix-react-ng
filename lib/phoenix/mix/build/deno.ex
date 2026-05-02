@@ -14,6 +14,10 @@ defmodule Mix.Tasks.Phx.React.Deno.Bundle do
 
   use Mix.Task
 
+  @react_version "19.2.5"
+  @react_import "npm:react@#{@react_version}"
+  @react_dom_server_import "npm:react-dom@#{@react_version}/server"
+
   @shortdoc "Bundle components into server.js"
   def run(args) do
     {opts, _argv} =
@@ -24,7 +28,9 @@ defmodule Mix.Tasks.Phx.React.Deno.Bundle do
 
     components =
       if File.dir?(base_dir) do
-        find_files(base_dir)
+        base_dir
+        |> find_files()
+        |> Enum.sort()
       else
         raise ArgumentError, "component_base dir does not exist: #{base_dir}"
       end
@@ -58,7 +64,14 @@ defmodule Mix.Tasks.Phx.React.Deno.Bundle do
     quoted = EEx.compile_file("#{__DIR__}/server_deno.js.eex")
 
     {result, _bindings} =
-      Code.eval_quoted(quoted, files: files, base_dir: base_dir, output: output)
+      Code.eval_quoted(
+        quoted,
+        files: files,
+        base_dir: base_dir,
+        output: output,
+        react_import: @react_import,
+        react_dom_server_import: @react_dom_server_import
+      )
 
     _outdir = Path.dirname(output)
 
@@ -82,8 +95,8 @@ defmodule Mix.Tasks.Phx.React.Deno.Bundle do
       deno_json_content = ~s({
         "nodeModulesDir": "auto",
         "imports": {
-          "react": "npm:react@19.2.5",
-          "react-dom/server": "npm:react-dom@19.2.5/server",
+          "react": "#{@react_import}",
+          "react-dom/server": "#{@react_dom_server_import}",
           "react-markdown": "npm:react-markdown@10.1.0",
           "remark-gfm": "npm:remark-gfm@4.0.1",
           "std/": "https://deno.land/std@0.224.0/"
